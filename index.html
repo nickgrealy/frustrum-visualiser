@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soccer Frustum Visualizer</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Segoe UI', system-ui, monospace;
+      overflow: hidden;
+    }
+
+    #sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    #sidebar h1 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #58a6ff;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8b949e;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .ctrl {
+      margin-bottom: 10px;
+    }
+
+    .ctrl-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #8b949e;
+      margin-bottom: 3px;
+    }
+
+    .ctrl-label span.val {
+      color: #e6edf3;
+      font-family: monospace;
+      font-size: 12px;
+      min-width: 52px;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      background: #21262d;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #58a6ff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #79c0ff;
+    }
+
+    .xyz-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .xyz-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .xyz-item .axis-label {
+      font-size: 10px;
+      color: #8b949e;
+      text-align: center;
+    }
+
+    .xyz-item .axis-val {
+      font-size: 11px;
+      color: #e6edf3;
+      font-family: monospace;
+      text-align: center;
+    }
+
+    #viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #viewport canvas {
+      display: block;
+    }
+
+    #inset-label {
+      position: absolute;
+      bottom: 174px;
+      right: 12px;
+      font-size: 10px;
+      color: #8b949e;
+      background: rgba(22, 27, 34, 0.85);
+      padding: 2px 6px;
+      border-radius: 3px 3px 0 0;
+      pointer-events: none;
+    }
+
+    #inset-border {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 280px;
+      height: 162px;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    #stats {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 11px;
+      color: #8b949e;
+      background: rgba(22, 27, 34, 0.85);
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid #21262d;
+      pointer-events: none;
+      line-height: 1.7;
+    }
+
+    #stats b { color: #58a6ff; }
+
+    .hint {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 10px;
+      color: #484f58;
+      pointer-events: none;
+    }
+
+    .divider { height: 1px; background: #21262d; margin: 14px 0; }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h1>⚽ Frustum Visualizer</h1>
+
+  <!-- ── Camera Position ── -->
+  <div class="section">
+    <div class="section-title">Camera Position</div>
+
+    <div class="ctrl">
+      <div class="ctrl-label">X <span class="val" id="camX-val">0.0 m</span></div>
+      <input type="range" id="camX" min="-60" max="60" step="0.5" value="0">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Y (height) <span class="val" id="camY-val">8.0 m</span></div>
+      <input type="range" id="camY" min="0.5" max="30" step="0.5" value="8">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Z (along sideline) <span class="val" id="camZ-val">-42.0 m</span></div>
+      <input type="range" id="camZ" min="-80" max="80" step="0.5" value="-42">
+    </div>
+  </div>
+
+  <!-- ── Camera Orientation ── -->
+  <div class="section">
+    <div class="section-title">Camera Orientation</div>
+
+    <div class="ctrl">
+      <div class="ctrl-label">Pitch (up/down) <span class="val" id="pitch-val">15°</span></div>
+      <input type="range" id="pitch" min="-90" max="90" step="1" value="15">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Yaw (left/right) <span class="val" id="yaw-val">0°</span></div>
+      <input type="range" id="yaw" min="-180" max="180" step="1" value="0">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Roll <span class="val" id="roll-val">0°</span></div>
+      <input type="range" id="roll" min="-45" max="45" step="1" value="0">
+    </div>
+  </div>
+
+  <!-- ── Field of View ── -->
+  <div class="section">
+    <div class="section-title">Field of View</div>
+
+    <div class="ctrl">
+      <div class="ctrl-label">Horizontal FOV <span class="val" id="hfov-val">90°</span></div>
+      <input type="range" id="hfov" min="10" max="170" step="1" value="90">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Vertical FOV <span class="val" id="vfov-val">55°</span></div>
+      <input type="range" id="vfov" min="5" max="160" step="1" value="55">
+    </div>
+  </div>
+
+  <!-- ── Field Dimensions ── -->
+  <div class="section">
+    <div class="section-title">Pitch Dimensions</div>
+
+    <div class="ctrl">
+      <div class="ctrl-label">Length <span class="val" id="fieldL-val">105 m</span></div>
+      <input type="range" id="fieldL" min="90" max="120" step="1" value="105">
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label">Width <span class="val" id="fieldW-val">68 m</span></div>
+      <input type="range" id="fieldW" min="45" max="90" step="1" value="68">
+    </div>
+  </div>
+
+  <!-- ── Viewing Camera ── -->
+  <div class="section">
+    <div class="section-title">Viewing Camera (Scene)</div>
+
+    <div class="ctrl">
+      <div class="ctrl-label">Preset</div>
+      <div style="display:flex;gap:6px;margin-top:4px;">
+        <button class="view-btn" data-view="top">Top</button>
+        <button class="view-btn" data-view="side">Side</button>
+        <button class="view-btn" data-view="iso">Iso</button>
+        <button class="view-btn" data-view="cam">From Cam</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-size:10px;color:#484f58;line-height:1.6;margin-top:8px;">
+    Drag to orbit · Scroll to zoom · Right-drag to pan
+  </div>
+</div>
+
+<div id="viewport">
+  <div id="stats">
+    <b>Coverage area:</b> <span id="stat-area">—</span><br>
+    <b>Farthest point:</b> <span id="stat-far">—</span><br>
+    <b>Nearest point:</b> <span id="stat-near">—</span>
+  </div>
+  <div id="inset-label">Camera POV</div>
+  <div id="inset-border"></div>
+  <div class="hint">Orbit: drag · Zoom: scroll · Pan: right-drag</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─── Globals ─────────────────────────────────────────────────────────────────
+
+const DEG = Math.PI / 180;
+const GROUND_Y = 0;
+
+// State
+const state = {
+  camX: 0, camY: 8, camZ: -42,
+  pitch: 15, yaw: 0, roll: 0,
+  hFov: 90, vFov: 55,
+  fieldL: 105, fieldW: 68,
+};
+
+// ─── Renderer ─────────────────────────────────────────────────────────────────
+
+const viewport = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x0d1117);
+renderer.setScissorTest(true);
+viewport.appendChild(renderer.domElement);
+
+// ─── Scene ───────────────────────────────────────────────────────────────────
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0d1117, 0.005);
+
+// Ambient + directional light
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(30, 60, -20);
+scene.add(dirLight);
+
+// ─── Viewing camera (orbit) ───────────────────────────────────────────────────
+
+const viewCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 2000);
+viewCamera.position.set(0, 90, -100);
+viewCamera.lookAt(0, 0, 0);
+
+const controls = new OrbitControls(viewCamera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+// ─── Field camera ────────────────────────────────────────────────────────────
+
+// We use a custom aspect ratio derived from H+V fov.
+const fieldCamera = new THREE.PerspectiveCamera(55, 1.636, 0.3, 300);
+fieldCamera.layers.set(0);
+
+// ─── Soccer field geometry ───────────────────────────────────────────────────
+
+let fieldGroup = new THREE.Group();
+scene.add(fieldGroup);
+
+function buildField(length, width) {
+  // Remove old field
+  while (fieldGroup.children.length) fieldGroup.remove(fieldGroup.children[0]);
+
+  const hl = length / 2, hw = width / 2;
+
+  // Green grass plane
+  const grassGeo = new THREE.PlaneGeometry(length + 20, width + 20);
+  const grassMat = new THREE.MeshLambertMaterial({ color: 0x1a4731 });
+  const grass = new THREE.Mesh(grassGeo, grassMat);
+  grass.rotation.x = -Math.PI / 2;
+  fieldGroup.add(grass);
+
+  // Slightly lighter inner pitch
+  const pitchGeo = new THREE.PlaneGeometry(length, width);
+  const pitchMat = new THREE.MeshLambertMaterial({ color: 0x1e5c3a });
+  const pitch = new THREE.Mesh(pitchGeo, pitchMat);
+  pitch.rotation.x = -Math.PI / 2;
+  pitch.position.y = 0.01;
+  fieldGroup.add(pitch);
+
+  // White line material
+  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+
+  function addLines(points, loop = false) {
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    const line = loop ? new THREE.LineLoop(geo, lineMat) : new THREE.Line(geo, lineMat);
+    line.position.y = 0.05;
+    fieldGroup.add(line);
+  }
+
+  // Outer boundary
+  addLines([
+    new THREE.Vector3(-hl, 0, -hw),
+    new THREE.Vector3( hl, 0, -hw),
+    new THREE.Vector3( hl, 0,  hw),
+    new THREE.Vector3(-hl, 0,  hw),
+  ], true);
+
+  // Halfway line
+  addLines([
+    new THREE.Vector3(0, 0, -hw),
+    new THREE.Vector3(0, 0,  hw),
+  ]);
+
+  // Centre circle (9.15m radius)
+  {
+    const pts = [];
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * 9.15, 0, Math.sin(a) * 9.15));
+    }
+    addLines(pts);
+  }
+
+  // Centre spot
+  {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3));
+    }
+    addLines(pts);
+  }
+
+  // Penalty areas (16.5m deep, 40.32m wide)
+  for (const side of [-1, 1]) {
+    const gx = side * hl;
+    const pw = 40.32 / 2, pd = 16.5;
+    addLines([
+      new THREE.Vector3(gx, 0, -pw),
+      new THREE.Vector3(gx - side * pd, 0, -pw),
+      new THREE.Vector3(gx - side * pd, 0,  pw),
+      new THREE.Vector3(gx, 0,  pw),
+    ], false);
+
+    // Goal area (5.5m deep, 18.32m wide)
+    const gw = 18.32 / 2, gd = 5.5;
+    addLines([
+      new THREE.Vector3(gx, 0, -gw),
+      new THREE.Vector3(gx - side * gd, 0, -gw),
+      new THREE.Vector3(gx - side * gd, 0,  gw),
+      new THREE.Vector3(gx, 0,  gw),
+    ], false);
+
+    // Penalty spot
+    {
+      const px = gx - side * 11;
+      const pts = [];
+      for (let i = 0; i <= 16; i++) {
+        const a = (i / 16) * Math.PI * 2;
+        pts.push(new THREE.Vector3(px + Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3));
+      }
+      addLines(pts);
+    }
+
+    // Penalty arc
+    {
+      const cx = gx - side * 11;
+      const r = 9.15;
+      const pts = [];
+      const startA = side > 0 ? 180 * DEG : 0;
+      const endA = startA + Math.PI;
+      for (let i = 0; i <= 48; i++) {
+        const a = startA + (i / 48) * Math.PI;
+        const wx = cx + Math.cos(a) * r;
+        const wz = Math.sin(a) * r;
+        // Only draw if outside penalty area
+        if (side > 0 ? wx < gx - pd : wx > gx + pd) continue;
+        pts.push(new THREE.Vector3(wx, 0, wz));
+      }
+      if (pts.length > 1) addLines(pts);
+    }
+
+    // Goals (7.32m wide, 2.44m tall)
+    const goalW = 7.32 / 2, goalH = 2.44, goalD = 2;
+    const goalMat = new THREE.LineBasicMaterial({ color: 0xdddddd });
+    const goalPts = [
+      new THREE.Vector3(gx, 0, -goalW),
+      new THREE.Vector3(gx + side * goalD, 0, -goalW),
+      new THREE.Vector3(gx + side * goalD, goalH, -goalW),
+      new THREE.Vector3(gx, goalH, -goalW),
+      new THREE.Vector3(gx, goalH,  goalW),
+      new THREE.Vector3(gx + side * goalD, goalH,  goalW),
+      new THREE.Vector3(gx + side * goalD, 0,  goalW),
+      new THREE.Vector3(gx, 0,  goalW),
+    ];
+    const goalGeo = new THREE.BufferGeometry().setFromPoints(goalPts);
+    fieldGroup.add(new THREE.Line(goalGeo, goalMat));
+
+    // Goal crossbar
+    const crossPts = [
+      new THREE.Vector3(gx, goalH, -goalW),
+      new THREE.Vector3(gx, goalH,  goalW),
+    ];
+    const crossGeo = new THREE.BufferGeometry().setFromPoints(crossPts);
+    fieldGroup.add(new THREE.Line(crossGeo, goalMat));
+
+    // Corner arcs
+    for (const cz of [-1, 1]) {
+      const cx2 = gx, cz2 = cz * hw;
+      const pts = [];
+      const arcStart = side > 0 ? (cz > 0 ? 180 * DEG : 90 * DEG) : (cz > 0 ? 270 * DEG : 0);
+      for (let i = 0; i <= 16; i++) {
+        const a = arcStart + (i / 16) * (Math.PI / 2);
+        pts.push(new THREE.Vector3(cx2 + Math.cos(a) * 1, 0, cz2 + Math.sin(a) * 1));
+      }
+      addLines(pts);
+    }
+  }
+
+  // Grid on grass (faint)
+  const gridMat = new THREE.LineBasicMaterial({ color: 0x1a4020, transparent: true, opacity: 0.5 });
+  for (let x = -Math.floor((length + 20) / 2); x <= Math.ceil((length + 20) / 2); x += 5) {
+    const g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(x, 0, -(width + 20) / 2),
+      new THREE.Vector3(x, 0,  (width + 20) / 2),
+    ]);
+    const l = new THREE.Line(g, gridMat);
+    l.position.y = 0.001;
+    fieldGroup.add(l);
+  }
+}
+
+// ─── Field camera mesh (visual representation) ────────────────────────────────
+
+const camGroup = new THREE.Group();
+scene.add(camGroup);
+
+// Camera body
+const camBodyGeo = new THREE.BoxGeometry(1.2, 0.8, 1.8);
+const camBodyMat = new THREE.MeshLambertMaterial({ color: 0x2d4a6e });
+const camBody = new THREE.Mesh(camBodyGeo, camBodyMat);
+camGroup.add(camBody);
+
+// Camera lens
+const lensGeo = new THREE.CylinderGeometry(0.25, 0.35, 0.6, 16);
+const lensMat = new THREE.MeshLambertMaterial({ color: 0x1a2d3d });
+const lens = new THREE.Mesh(lensGeo, lensMat);
+lens.rotation.x = Math.PI / 2;
+lens.position.z = 1.1;
+camGroup.add(lens);
+
+// Direction arrow
+const arrowDir = new THREE.Vector3(0, 0, 1);
+const arrowHelper = new THREE.ArrowHelper(arrowDir, new THREE.Vector3(0, 0, 0), 3, 0x58a6ff, 0.6, 0.3);
+camGroup.add(arrowHelper);
+
+// ─── Camera helper (frustum wireframe) ───────────────────────────────────────
+
+let cameraHelper = new THREE.CameraHelper(fieldCamera);
+scene.add(cameraHelper);
+
+// ─── Frustum ground intersection ─────────────────────────────────────────────
+
+let intersectMesh = null;
+let intersectBorder = null;
+
+function rayGroundIntersect(origin, dir) {
+  // Intersect ray with y=0 plane. Returns THREE.Vector3 or null.
+  if (Math.abs(dir.y) < 1e-7) return null;
+  const t = -origin.y / dir.y;
+  if (t < 0) return null;
+  return new THREE.Vector3(
+    origin.x + dir.x * t,
+    0,
+    origin.z + dir.z * t,
+  );
+}
+
+// NDC corners: BL, BR, TR, TL (CCW from bottom-left)
+const NDC_CORNERS = [
+  new THREE.Vector3(-1, -1, 1),
+  new THREE.Vector3( 1, -1, 1),
+  new THREE.Vector3( 1,  1, 1),
+  new THREE.Vector3(-1,  1, 1),
+];
+
+function computeGroundPolygon(camera) {
+  const origin = camera.position.clone();
+  const pts = [];
+
+  for (const ndc of NDC_CORNERS) {
+    const world = ndc.clone().unproject(camera);
+    const dir = world.sub(origin).normalize();
+    const hit = rayGroundIntersect(origin, dir);
+    if (hit) pts.push(hit);
+  }
+
+  return pts;
+}
+
+function updateIntersection() {
+  // Remove old meshes
+  if (intersectMesh) { scene.remove(intersectMesh); intersectMesh.geometry.dispose(); }
+  if (intersectBorder) { scene.remove(intersectBorder); intersectBorder.geometry.dispose(); }
+
+  const pts = computeGroundPolygon(fieldCamera);
+
+  // Update stats
+  const areaEl = document.getElementById('stat-area');
+  const farEl = document.getElementById('stat-far');
+  const nearEl = document.getElementById('stat-near');
+
+  if (pts.length < 3) {
+    areaEl.textContent = '—';
+    farEl.textContent = '—';
+    nearEl.textContent = '—';
+    return;
+  }
+
+  // Compute polygon area via shoelace (in XZ)
+  let area = 0;
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const a = pts[i], b = pts[(i + 1) % n];
+    area += a.x * b.z - b.x * a.z;
+  }
+  area = Math.abs(area) / 2;
+
+  // Near/far from camera position
+  const camPos = fieldCamera.position;
+  const dists = pts.map(p => camPos.distanceTo(p));
+  const nearD = Math.min(...dists);
+  const farD = Math.max(...dists);
+
+  areaEl.textContent = area.toFixed(0) + ' m²';
+  farEl.textContent = farD.toFixed(1) + ' m';
+  nearEl.textContent = nearD.toFixed(1) + ' m';
+
+  // Filled polygon (ShapeGeometry in XZ, rotated to ground)
+  // We build in XZ → create Shape using x,z mapped to x,y then rotate -90° around X
+  const shape = new THREE.Shape();
+  shape.moveTo(pts[0].x, pts[0].z);
+  for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
+  shape.closePath();
+
+  const fillGeo = new THREE.ShapeGeometry(shape);
+  const fillMat = new THREE.MeshBasicMaterial({
+    color: 0xff6b35,
+    transparent: true,
+    opacity: 0.22,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  intersectMesh = new THREE.Mesh(fillGeo, fillMat);
+  intersectMesh.rotation.x = -Math.PI / 2;
+  intersectMesh.position.y = 0.08;
+  scene.add(intersectMesh);
+
+  // Border line
+  const borderPts = [...pts, pts[0]].map(p => new THREE.Vector3(p.x, 0.1, p.z));
+  const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPts);
+  const borderMat = new THREE.LineBasicMaterial({ color: 0xff8c42, linewidth: 2 });
+  intersectBorder = new THREE.Line(borderGeo, borderMat);
+  scene.add(intersectBorder);
+}
+
+// ─── Update field camera from state ──────────────────────────────────────────
+
+function updateFieldCamera() {
+  fieldCamera.position.set(state.camX, state.camY, state.camZ);
+
+  // Build rotation: base orientation is looking in +Z (toward positive Z),
+  // which needs Y=180° since THREE camera default looks in -Z.
+  // User pitch/yaw/roll are applied on top in YXZ order.
+  fieldCamera.rotation.order = 'YXZ';
+  fieldCamera.rotation.set(
+    -state.pitch * DEG,           // pitch: negative = tilts down toward +Z ground
+    (180 + state.yaw) * DEG,      // yaw: 180 base + user offset
+    state.roll * DEG,
+  );
+
+  // Update FOV from H+V fov
+  const hRad = state.hFov * DEG;
+  const vRad = state.vFov * DEG;
+  fieldCamera.fov = state.vFov;
+  fieldCamera.aspect = Math.tan(hRad / 2) / Math.tan(vRad / 2);
+  fieldCamera.near = 0.3;
+  fieldCamera.far = 300;
+  fieldCamera.updateProjectionMatrix();
+
+  // Sync visual camera group
+  camGroup.position.copy(fieldCamera.position);
+  camGroup.rotation.copy(fieldCamera.rotation);
+  camGroup.rotation.order = fieldCamera.rotation.order;
+
+  // Rebuild camera helper
+  scene.remove(cameraHelper);
+  cameraHelper = new THREE.CameraHelper(fieldCamera);
+  scene.add(cameraHelper);
+
+  updateIntersection();
+}
+
+// ─── Controls wiring ──────────────────────────────────────────────────────────
+
+function wireControl(id, key, fmt) {
+  const slider = document.getElementById(id);
+  const valEl = document.getElementById(id + '-val');
+  slider.value = state[key];
+  valEl.textContent = fmt(state[key]);
+
+  slider.addEventListener('input', () => {
+    state[key] = parseFloat(slider.value);
+    valEl.textContent = fmt(state[key]);
+    if (['fieldL', 'fieldW'].includes(key)) {
+      buildField(state.fieldL, state.fieldW);
+    }
+    updateFieldCamera();
+  });
+}
+
+function fmtM(v) { return v.toFixed(1) + ' m'; }
+function fmtDeg(v) { return v.toFixed(0) + '°'; }
+
+wireControl('camX', 'camX', fmtM);
+wireControl('camY', 'camY', fmtM);
+wireControl('camZ', 'camZ', fmtM);
+wireControl('pitch', 'pitch', fmtDeg);
+wireControl('yaw', 'yaw', fmtDeg);
+wireControl('roll', 'roll', fmtDeg);
+wireControl('hfov', 'hFov', fmtDeg);
+wireControl('vfov', 'vFov', fmtDeg);
+wireControl('fieldL', 'fieldL', v => v.toFixed(0) + ' m');
+wireControl('fieldW', 'fieldW', v => v.toFixed(0) + ' m');
+
+// View presets
+const PRESETS = {
+  top:  { pos: [0, 150, 0.01],  target: [0, 0, 0] },
+  side: { pos: [0, 30, -130],   target: [0, 0, 0] },
+  iso:  { pos: [80, 80, -100],  target: [0, 0, 0] },
+  cam:  null, // special: match field camera
+};
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const view = btn.dataset.view;
+    if (view === 'cam') {
+      // Match viewing camera to field camera position/orientation
+      viewCamera.position.copy(fieldCamera.position);
+      viewCamera.rotation.copy(fieldCamera.rotation);
+      viewCamera.rotation.order = fieldCamera.rotation.order;
+      viewCamera.fov = fieldCamera.fov;
+      viewCamera.aspect = fieldCamera.aspect;
+      viewCamera.updateProjectionMatrix();
+      controls.target.set(
+        fieldCamera.position.x + Math.sin(fieldCamera.rotation.y) * 30,
+        0,
+        fieldCamera.position.z + Math.cos(fieldCamera.rotation.y) * 30,
+      );
+    } else {
+      const p = PRESETS[view];
+      viewCamera.position.set(...p.pos);
+      controls.target.set(...p.target);
+      viewCamera.fov = 50;
+      viewCamera.updateProjectionMatrix();
+    }
+    controls.update();
+  });
+});
+
+// Style view buttons
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.style.cssText = `
+    flex: 1; padding: 4px 0; font-size: 10px; font-family: monospace;
+    background: #21262d; border: 1px solid #30363d; color: #8b949e;
+    border-radius: 3px; cursor: pointer;
+  `;
+  btn.addEventListener('mouseenter', () => btn.style.background = '#2d333b');
+  btn.addEventListener('mouseleave', () => btn.style.background = '#21262d');
+});
+
+// ─── Resize handler ───────────────────────────────────────────────────────────
+
+function onResize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  renderer.setSize(w, h);
+  viewCamera.aspect = w / h;
+  viewCamera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ─── Inset config ─────────────────────────────────────────────────────────────
+
+const INSET = { w: 280, h: 162, margin: 12 };
+
+// ─── Render loop ──────────────────────────────────────────────────────────────
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+
+  const totalW = viewport.clientWidth;
+  const totalH = viewport.clientHeight;
+
+  renderer.setViewport(0, 0, totalW, totalH);
+  renderer.setScissor(0, 0, totalW, totalH);
+
+  // Show camera helper in main view, hide in inset
+  cameraHelper.visible = true;
+  camGroup.visible = true;
+
+  renderer.render(scene, viewCamera);
+
+  // ── Inset: field camera POV ──
+  const ix = totalW - INSET.w - INSET.margin;
+  const iy = INSET.margin;  // from top in DOM, but WebGL Y flips
+
+  // Position the inset label/border elements
+  document.getElementById('inset-label').style.bottom = (INSET.h + INSET.margin + 2) + 'px';
+  document.getElementById('inset-border').style.bottom = INSET.margin + 'px';
+  document.getElementById('inset-border').style.right = INSET.margin + 'px';
+  document.getElementById('inset-border').style.width = INSET.w + 'px';
+  document.getElementById('inset-border').style.height = INSET.h + 'px';
+
+  // WebGL y=0 is bottom; DOM y=0 is top
+  const glY = totalH - INSET.h - INSET.margin;
+
+  // Set field camera aspect to match inset
+  fieldCamera.aspect = INSET.w / INSET.h;
+  fieldCamera.updateProjectionMatrix();
+
+  cameraHelper.visible = false;
+  camGroup.visible = false;
+
+  renderer.setViewport(ix, glY, INSET.w, INSET.h);
+  renderer.setScissor(ix, glY, INSET.w, INSET.h);
+  renderer.setClearColor(0x0a1a10, 1);
+  renderer.clear(false, true, false);
+  renderer.render(scene, fieldCamera);
+
+  // Restore for next frame
+  cameraHelper.visible = true;
+  camGroup.visible = true;
+  renderer.setClearColor(0x0d1117);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+buildField(state.fieldL, state.fieldW);
+updateFieldCamera();
+animate();
+</script>
+
+</body>
+</html>
