@@ -559,8 +559,8 @@ lens.rotation.x = Math.PI / 2;
 lens.position.z = 1.1;
 camGroup.add(lens);
 
-// Direction arrow
-const arrowDir = new THREE.Vector3(0, 0, 1);
+// Direction arrow (camera looks down local -Z axis)
+const arrowDir = new THREE.Vector3(0, 0, -1);
 const arrowHelper = new THREE.ArrowHelper(arrowDir, new THREE.Vector3(0, 0, 0), 3, 0x58a6ff, 0.6, 0.3);
 camGroup.add(arrowHelper);
 
