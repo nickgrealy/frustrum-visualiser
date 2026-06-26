@@ -707,8 +707,10 @@ function updateIntersection() {
     side: THREE.DoubleSide,
     depthWrite: false,
   });
+  // +90° about X maps the shape's (x, z) plane onto world (x, z) without
+  // flipping z; -90° would mirror the fill across the halfway line.
   intersectMesh = new THREE.Mesh(fillGeo, fillMat);
-  intersectMesh.rotation.x = -Math.PI / 2;
+  intersectMesh.rotation.x = Math.PI / 2;
   intersectMesh.position.y = 0.08;
   intersectMesh.renderOrder = 998;
   scene.add(intersectMesh);
@@ -744,6 +746,9 @@ function updateFieldCamera() {
   fieldCamera.near = 0.3;
   fieldCamera.far = 300;
   fieldCamera.updateProjectionMatrix();
+  // unproject() (used by the footprint calc) needs an up-to-date world matrix;
+  // on initial load this isn't computed until the first render, so force it now.
+  fieldCamera.updateMatrixWorld(true);
 
   // Sync visual camera group
   camGroup.position.copy(fieldCamera.position);
