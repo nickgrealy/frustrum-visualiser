@@ -350,9 +350,6 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Line2 } from 'three/addons/lines/Line2.js';
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 // ─── Globals ─────────────────────────────────────────────────────────────────
 
@@ -586,16 +583,7 @@ scene.add(cameraHelper);
 let intersectMesh = null;
 let intersectBorder = null;
 
-// Shared material for the pitch-intersection outline. `resolution` must track
-// the canvas size for Line2 to render the width correctly (kept in sync in
-// onResize()).
-const outlineMat = new LineMaterial({
-  color: 0xffd23f,
-  linewidth: 3,            // in pixels
-  transparent: true,
-  depthTest: false,
-});
-outlineMat.resolution.set(window.innerWidth, window.innerHeight);
+const outlineMat = new THREE.LineBasicMaterial({ color: 0xffd23f, depthTest: false });
 
 // Compute the frustum's footprint on the ground (y=0) as a closed polygon.
 // We sample densely around the view rectangle's border so the shape stays
@@ -719,14 +707,10 @@ function updateIntersection() {
   intersectMesh.position.y = 0.08;
   scene.add(intersectMesh);
 
-  // Thick, bright outline (Line2 so width is honoured in pixels)
-  const flat = [];
-  for (const p of pts) flat.push(p.x, 0.12, p.z);
-  flat.push(pts[0].x, 0.12, pts[0].z); // close the loop
-  const lineGeo = new LineGeometry();
-  lineGeo.setPositions(flat);
-  intersectBorder = new Line2(lineGeo, outlineMat);
-  intersectBorder.computeLineDistances();
+  // Closed outline on the ground, drawn above the pitch surface to avoid z-fighting.
+  const borderPts = [...pts, pts[0]].map(p => new THREE.Vector3(p.x, 0.15, p.z));
+  const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPts);
+  intersectBorder = new THREE.Line(borderGeo, outlineMat);
   scene.add(intersectBorder);
 }
 
@@ -863,7 +847,6 @@ function onResize() {
   renderer.setSize(w, h);
   viewCamera.aspect = w / h;
   viewCamera.updateProjectionMatrix();
-  outlineMat.resolution.set(w, h);
 }
 window.addEventListener('resize', onResize);
 onResize();
