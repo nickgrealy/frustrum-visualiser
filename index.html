@@ -165,8 +165,6 @@
 
     #inset-label {
       position: absolute;
-      bottom: 174px;
-      right: 12px;
       font-size: 10px;
       color: #8b949e;
       background: rgba(22, 27, 34, 0.85);
@@ -177,10 +175,6 @@
 
     #inset-border {
       position: absolute;
-      bottom: 12px;
-      right: 12px;
-      width: 280px;
-      height: 162px;
       border: 1px solid #30363d;
       border-radius: 4px;
       pointer-events: none;
@@ -816,11 +810,13 @@ function onResize() {
 window.addEventListener('resize', onResize);
 onResize();
 
-// ─── Inset config ─────────────────────────────────────────────────────────────
-
-const INSET = { w: 280, h: 162, margin: 12 };
+const INSET_MARGIN = 12;
+const INSET_H = 162;
 
 // ─── Render loop ──────────────────────────────────────────────────────────────
+
+const insetLabelEl = document.getElementById('inset-label');
+const insetBorderEl = document.getElementById('inset-border');
 
 function animate() {
   requestAnimationFrame(animate);
@@ -832,40 +828,36 @@ function animate() {
   renderer.setViewport(0, 0, totalW, totalH);
   renderer.setScissor(0, 0, totalW, totalH);
 
-  // Show camera helper in main view, hide in inset
   cameraHelper.visible = true;
   camGroup.visible = true;
-
   renderer.render(scene, viewCamera);
 
   // ── Inset: field camera POV ──
-  const ix = totalW - INSET.w - INSET.margin;
-  const iy = INSET.margin;  // from top in DOM, but WebGL Y flips
+  // Derive inset width from camera's H/V FOV aspect ratio
+  const camAspect = fieldCamera.aspect;  // set correctly by updateFieldCamera
+  const insetW = Math.round(INSET_H * camAspect);
 
-  // Position the inset label/border elements
-  document.getElementById('inset-label').style.bottom = (INSET.h + INSET.margin + 2) + 'px';
-  document.getElementById('inset-border').style.bottom = INSET.margin + 'px';
-  document.getElementById('inset-border').style.right = INSET.margin + 'px';
-  document.getElementById('inset-border').style.width = INSET.w + 'px';
-  document.getElementById('inset-border').style.height = INSET.h + 'px';
+  // WebGL: Y=0 is BOTTOM of canvas — place inset at bottom-right
+  const ix = totalW - insetW - INSET_MARGIN;
+  const glY = INSET_MARGIN;  // distance from bottom edge in GL coords
 
-  // WebGL y=0 is bottom; DOM y=0 is top
-  const glY = totalH - INSET.h - INSET.margin;
-
-  // Set field camera aspect to match inset
-  fieldCamera.aspect = INSET.w / INSET.h;
-  fieldCamera.updateProjectionMatrix();
+  // Sync DOM overlay elements to bottom-right (CSS: bottom/right positioning)
+  insetBorderEl.style.width = insetW + 'px';
+  insetBorderEl.style.height = INSET_H + 'px';
+  insetBorderEl.style.right = INSET_MARGIN + 'px';
+  insetBorderEl.style.bottom = INSET_MARGIN + 'px';
+  insetLabelEl.style.right = INSET_MARGIN + 'px';
+  insetLabelEl.style.bottom = (INSET_H + INSET_MARGIN + 2) + 'px';
 
   cameraHelper.visible = false;
   camGroup.visible = false;
 
-  renderer.setViewport(ix, glY, INSET.w, INSET.h);
-  renderer.setScissor(ix, glY, INSET.w, INSET.h);
+  renderer.setViewport(ix, glY, insetW, INSET_H);
+  renderer.setScissor(ix, glY, insetW, INSET_H);
   renderer.setClearColor(0x0a1a10, 1);
   renderer.clear(false, true, false);
   renderer.render(scene, fieldCamera);
 
-  // Restore for next frame
   cameraHelper.visible = true;
   camGroup.visible = true;
   renderer.setClearColor(0x0d1117);
