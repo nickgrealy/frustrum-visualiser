@@ -72,6 +72,39 @@
       text-align: right;
     }
 
+    .ctrl-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ctrl-row input[type="range"] {
+      flex: 1;
+      height: 4px;
+      appearance: none;
+      background: #21262d;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .ctrl-row input[type="number"] {
+      width: 54px;
+      padding: 2px 4px;
+      font-size: 11px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .ctrl-row input[type="number"]:focus {
+      outline: none;
+      border-color: #58a6ff;
+      background: #161b22;
+    }
+
     input[type="range"] {
       width: 100%;
       height: 4px;
@@ -191,16 +224,25 @@
     <div class="section-title">Camera Position</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">X <span class="val" id="camX-val">0.0 m</span></div>
-      <input type="range" id="camX" min="-60" max="60" step="0.5" value="0">
+      <div class="ctrl-label">X</div>
+      <div class="ctrl-row">
+        <input type="range" id="camX" min="-60" max="60" step="0.5" value="0">
+        <input type="number" id="camX-num" step="0.5" value="0">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Y (height) <span class="val" id="camY-val">8.0 m</span></div>
-      <input type="range" id="camY" min="0.5" max="30" step="0.5" value="8">
+      <div class="ctrl-label">Y (height)</div>
+      <div class="ctrl-row">
+        <input type="range" id="camY" min="0.5" max="30" step="0.5" value="8">
+        <input type="number" id="camY-num" step="0.5" value="8">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Z (along sideline) <span class="val" id="camZ-val">-42.0 m</span></div>
-      <input type="range" id="camZ" min="-80" max="80" step="0.5" value="-42">
+      <div class="ctrl-label">Z (along sideline)</div>
+      <div class="ctrl-row">
+        <input type="range" id="camZ" min="-80" max="80" step="0.5" value="-42">
+        <input type="number" id="camZ-num" step="0.5" value="-42">
+      </div>
     </div>
   </div>
 
@@ -209,16 +251,25 @@
     <div class="section-title">Camera Orientation</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Pitch (up/down) <span class="val" id="pitch-val">15°</span></div>
-      <input type="range" id="pitch" min="-90" max="90" step="1" value="15">
+      <div class="ctrl-label">Pitch (up/down)</div>
+      <div class="ctrl-row">
+        <input type="range" id="pitch" min="-90" max="90" step="1" value="15">
+        <input type="number" id="pitch-num" step="1" value="15">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Yaw (left/right) <span class="val" id="yaw-val">0°</span></div>
-      <input type="range" id="yaw" min="-180" max="180" step="1" value="0">
+      <div class="ctrl-label">Yaw (left/right)</div>
+      <div class="ctrl-row">
+        <input type="range" id="yaw" min="-180" max="180" step="1" value="0">
+        <input type="number" id="yaw-num" step="1" value="0">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Roll <span class="val" id="roll-val">0°</span></div>
-      <input type="range" id="roll" min="-45" max="45" step="1" value="0">
+      <div class="ctrl-label">Roll</div>
+      <div class="ctrl-row">
+        <input type="range" id="roll" min="-45" max="45" step="1" value="0">
+        <input type="number" id="roll-num" step="1" value="0">
+      </div>
     </div>
   </div>
 
@@ -227,12 +278,18 @@
     <div class="section-title">Field of View</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Horizontal FOV <span class="val" id="hfov-val">90°</span></div>
-      <input type="range" id="hfov" min="10" max="170" step="1" value="90">
+      <div class="ctrl-label">Horizontal FOV</div>
+      <div class="ctrl-row">
+        <input type="range" id="hfov" min="10" max="170" step="1" value="90">
+        <input type="number" id="hfov-num" step="1" value="90">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Vertical FOV <span class="val" id="vfov-val">55°</span></div>
-      <input type="range" id="vfov" min="5" max="160" step="1" value="55">
+      <div class="ctrl-label">Vertical FOV</div>
+      <div class="ctrl-row">
+        <input type="range" id="vfov" min="5" max="160" step="1" value="55">
+        <input type="number" id="vfov-num" step="1" value="55">
+      </div>
     </div>
   </div>
 
@@ -241,12 +298,18 @@
     <div class="section-title">Pitch Dimensions</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Length <span class="val" id="fieldL-val">105 m</span></div>
-      <input type="range" id="fieldL" min="90" max="120" step="1" value="105">
+      <div class="ctrl-label">Length</div>
+      <div class="ctrl-row">
+        <input type="range" id="fieldL" min="90" max="120" step="1" value="105">
+        <input type="number" id="fieldL-num" step="1" value="105">
+      </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Width <span class="val" id="fieldW-val">68 m</span></div>
-      <input type="range" id="fieldW" min="45" max="90" step="1" value="68">
+      <div class="ctrl-label">Width</div>
+      <div class="ctrl-row">
+        <input type="range" id="fieldW" min="45" max="90" step="1" value="68">
+        <input type="number" id="fieldW-num" step="1" value="68">
+      </div>
     </div>
   </div>
 
@@ -445,24 +508,6 @@ function buildField(length, width) {
       addLines(pts);
     }
 
-    // Penalty arc
-    {
-      const cx = gx - side * 11;
-      const r = 9.15;
-      const pts = [];
-      const startA = side > 0 ? 180 * DEG : 0;
-      const endA = startA + Math.PI;
-      for (let i = 0; i <= 48; i++) {
-        const a = startA + (i / 48) * Math.PI;
-        const wx = cx + Math.cos(a) * r;
-        const wz = Math.sin(a) * r;
-        // Only draw if outside penalty area
-        if (side > 0 ? wx < gx - pd : wx > gx + pd) continue;
-        pts.push(new THREE.Vector3(wx, 0, wz));
-      }
-      if (pts.length > 1) addLines(pts);
-    }
-
     // Goals (7.32m wide, 2.44m tall)
     const goalW = 7.32 / 2, goalH = 2.44, goalD = 2;
     const goalMat = new THREE.LineBasicMaterial({ color: 0xdddddd });
@@ -486,18 +531,6 @@ function buildField(length, width) {
     ];
     const crossGeo = new THREE.BufferGeometry().setFromPoints(crossPts);
     fieldGroup.add(new THREE.Line(crossGeo, goalMat));
-
-    // Corner arcs
-    for (const cz of [-1, 1]) {
-      const cx2 = gx, cz2 = cz * hw;
-      const pts = [];
-      const arcStart = side > 0 ? (cz > 0 ? 180 * DEG : 90 * DEG) : (cz > 0 ? 270 * DEG : 0);
-      for (let i = 0; i <= 16; i++) {
-        const a = arcStart + (i / 16) * (Math.PI / 2);
-        pts.push(new THREE.Vector3(cx2 + Math.cos(a) * 1, 0, cz2 + Math.sin(a) * 1));
-      }
-      addLines(pts);
-    }
   }
 
   // Grid on grass (faint)
@@ -657,7 +690,7 @@ function updateFieldCamera() {
   // User pitch/yaw/roll are applied on top in YXZ order.
   fieldCamera.rotation.order = 'YXZ';
   fieldCamera.rotation.set(
-    -state.pitch * DEG,           // pitch: negative = tilts down toward +Z ground
+    state.pitch * DEG,            // pitch: positive = tilts down toward field
     (180 + state.yaw) * DEG,      // yaw: 180 base + user offset
     state.roll * DEG,
   );
@@ -688,17 +721,27 @@ function updateFieldCamera() {
 
 function wireControl(id, key, fmt) {
   const slider = document.getElementById(id);
-  const valEl = document.getElementById(id + '-val');
-  slider.value = state[key];
-  valEl.textContent = fmt(state[key]);
+  const numInput = document.getElementById(id + '-num');
 
-  slider.addEventListener('input', () => {
-    state[key] = parseFloat(slider.value);
-    valEl.textContent = fmt(state[key]);
+  slider.value = state[key];
+  numInput.value = state[key];
+
+  const update = (val) => {
+    state[key] = parseFloat(val);
+    slider.value = state[key];
+    numInput.value = state[key];
     if (['fieldL', 'fieldW'].includes(key)) {
       buildField(state.fieldL, state.fieldW);
     }
     updateFieldCamera();
+  };
+
+  slider.addEventListener('input', (e) => update(e.target.value));
+  numInput.addEventListener('change', (e) => {
+    let val = parseFloat(e.target.value);
+    const min = parseFloat(slider.min), max = parseFloat(slider.max);
+    val = Math.max(min, Math.min(max, val));
+    update(val);
   });
 }
 
