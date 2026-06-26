@@ -667,31 +667,36 @@ function updateIntersection() {
   const farEl = document.getElementById('stat-far');
   const nearEl = document.getElementById('stat-near');
 
-  // Frustum footprint on the ground, clipped to the pitch rectangle.
+  // Full frustum footprint on the ground (not clipped to pitch).
   const hl = state.fieldL / 2, hw = state.fieldW / 2;
-  const footprint = computeFootprint(fieldCamera);
-  const pts = clipToRect(footprint, -hl, hl, -hw, hw);
+  const pts = computeFootprint(fieldCamera);
 
   if (pts.length < 3) {
-    areaEl.textContent = 'off pitch';
+    areaEl.textContent = '—';
     farEl.textContent = '—';
     nearEl.textContent = '—';
     return;
   }
 
-  // Polygon area on the visible pitch (shoelace in XZ)
-  let area = 0;
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[i], b = pts[(i + 1) % pts.length];
-    area += a.x * b.z - b.x * a.z;
+  // Stats reflect the on-pitch coverage (clip footprint to pitch for this).
+  const pitchPts = clipToRect(pts, -hl, hl, -hw, hw);
+  if (pitchPts.length >= 3) {
+    let area = 0;
+    for (let i = 0; i < pitchPts.length; i++) {
+      const a = pitchPts[i], b = pitchPts[(i + 1) % pitchPts.length];
+      area += a.x * b.z - b.x * a.z;
+    }
+    area = Math.abs(area) / 2;
+    const camPos = fieldCamera.position;
+    const dists = pitchPts.map(p => camPos.distanceTo(p));
+    areaEl.textContent = area.toFixed(0) + ' m² (pitch)';
+    farEl.textContent = Math.max(...dists).toFixed(1) + ' m';
+    nearEl.textContent = Math.min(...dists).toFixed(1) + ' m';
+  } else {
+    areaEl.textContent = 'off pitch';
+    farEl.textContent = '—';
+    nearEl.textContent = '—';
   }
-  area = Math.abs(area) / 2;
-
-  const camPos = fieldCamera.position;
-  const dists = pts.map(p => camPos.distanceTo(p));
-  areaEl.textContent = area.toFixed(0) + ' m²';
-  farEl.textContent = Math.max(...dists).toFixed(1) + ' m';
-  nearEl.textContent = Math.min(...dists).toFixed(1) + ' m';
 
   // Translucent fill
   const shape = new THREE.Shape();
