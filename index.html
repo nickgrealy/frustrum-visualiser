@@ -247,8 +247,8 @@
     <div class="ctrl">
       <div class="ctrl-label">Pitch (up/down)</div>
       <div class="ctrl-row">
-        <input type="range" id="pitch" min="-90" max="90" step="1" value="15">
-        <input type="number" id="pitch-num" step="1" value="15">
+        <input type="range" id="pitch" min="-90" max="90" step="1" value="-15">
+        <input type="number" id="pitch-num" step="1" value="-15">
       </div>
     </div>
     <div class="ctrl">
@@ -359,7 +359,7 @@ const GROUND_Y = 0;
 // State
 const state = {
   camX: 0, camY: 8, camZ: -42,
-  pitch: 15, yaw: 0, roll: 0,
+  pitch: -15, yaw: 0, roll: 0,
   hFov: 90, vFov: 55,
   fieldL: 105, fieldW: 68,
 };
@@ -551,14 +551,6 @@ const camBodyMat = new THREE.MeshLambertMaterial({ color: 0x2d4a6e });
 const camBody = new THREE.Mesh(camBodyGeo, camBodyMat);
 camGroup.add(camBody);
 
-// Camera lens
-const lensGeo = new THREE.CylinderGeometry(0.25, 0.35, 0.6, 16);
-const lensMat = new THREE.MeshLambertMaterial({ color: 0x1a2d3d });
-const lens = new THREE.Mesh(lensGeo, lensMat);
-lens.rotation.x = Math.PI / 2;
-lens.position.z = 1.1;
-camGroup.add(lens);
-
 // Direction arrow (camera looks down local -Z axis)
 const arrowDir = new THREE.Vector3(0, 0, -1);
 const arrowHelper = new THREE.ArrowHelper(arrowDir, new THREE.Vector3(0, 0, 0), 3, 0x58a6ff, 0.6, 0.3);
@@ -684,7 +676,7 @@ function updateFieldCamera() {
   // User pitch/yaw/roll are applied on top in YXZ order.
   fieldCamera.rotation.order = 'YXZ';
   fieldCamera.rotation.set(
-    state.pitch * DEG,            // pitch: positive = tilts down toward field
+    -state.pitch * DEG,           // pitch: negative value = tilts down toward field
     (180 + state.yaw) * DEG,      // yaw: 180 base + user offset
     state.roll * DEG,
   );
@@ -766,12 +758,18 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     const view = btn.dataset.view;
     if (view === 'cam') {
       // Match viewing camera to field camera position/orientation
-      viewCamera.position.copy(fieldCamera.position);
       viewCamera.rotation.copy(fieldCamera.rotation);
       viewCamera.rotation.order = fieldCamera.rotation.order;
       viewCamera.fov = fieldCamera.fov;
       viewCamera.aspect = fieldCamera.aspect;
       viewCamera.updateProjectionMatrix();
+
+      // Move camera forward along its viewing direction to avoid being inside the camera mesh
+      const viewDir = new THREE.Vector3(0, 0, -1);
+      viewDir.applyEuler(fieldCamera.rotation);
+      const offset = viewDir.multiplyScalar(2);
+      viewCamera.position.copy(fieldCamera.position).add(offset);
+
       controls.target.set(
         fieldCamera.position.x + Math.sin(fieldCamera.rotation.y) * 30,
         0,
