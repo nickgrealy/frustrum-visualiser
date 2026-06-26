@@ -364,6 +364,28 @@ const state = {
   fieldL: 105, fieldW: 68,
 };
 
+// Load from localStorage if available
+(() => {
+  try {
+    const saved = localStorage.getItem('frustum-viz-state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.assign(state, parsed);
+    }
+  } catch (e) {
+    console.warn('Failed to load state from localStorage:', e);
+  }
+})();
+
+// Save state to localStorage
+function saveState() {
+  try {
+    localStorage.setItem('frustum-viz-state', JSON.stringify(state));
+  } catch (e) {
+    console.warn('Failed to save state to localStorage:', e);
+  }
+}
+
 // ─── Renderer ─────────────────────────────────────────────────────────────────
 
 const viewport = document.getElementById('viewport');
@@ -720,6 +742,7 @@ function wireControl(id, key, fmt) {
       buildField(state.fieldL, state.fieldW);
     }
     updateFieldCamera();
+    saveState();
   };
 
   slider.addEventListener('input', (e) => update(e.target.value));
