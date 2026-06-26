@@ -716,14 +716,16 @@ function updateIntersection() {
   });
   // +90° about X maps the shape's (x, z) plane onto world (x, z) without
   // flipping z; -90° would mirror the fill across the halfway line.
+  const OVERLAY_Y = 0.02;
+
   intersectMesh = new THREE.Mesh(fillGeo, fillMat);
   intersectMesh.rotation.x = Math.PI / 2;
-  intersectMesh.position.y = 0.08;
+  intersectMesh.position.y = OVERLAY_Y;
   intersectMesh.renderOrder = 998;
   scene.add(intersectMesh);
 
-  // Closed outline, forced to draw last and on top of everything else.
-  const borderPts = [...pts, pts[0]].map(p => new THREE.Vector3(p.x, 0.15, p.z));
+  // Closed outline at the same height as the fill.
+  const borderPts = [...pts, pts[0]].map(p => new THREE.Vector3(p.x, OVERLAY_Y, p.z));
   const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPts);
   intersectBorder = new THREE.Line(borderGeo, outlineMat);
   intersectBorder.renderOrder = 999;
