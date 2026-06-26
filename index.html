@@ -567,10 +567,12 @@ function buildField(length, width) {
 const camGroup = new THREE.Group();
 scene.add(camGroup);
 
-// Camera body
+// Camera body. The camera looks down local -Z, so offset the box back by half
+// its depth (0.9) so its front face sits on the focal point / frustum apex.
 const camBodyGeo = new THREE.BoxGeometry(1.2, 0.8, 1.8);
 const camBodyMat = new THREE.MeshLambertMaterial({ color: 0x2d4a6e });
 const camBody = new THREE.Mesh(camBodyGeo, camBodyMat);
+camBody.position.z = 0.9;
 camGroup.add(camBody);
 
 // ─── Camera helper (frustum wireframe) ───────────────────────────────────────
