@@ -350,6 +350,9 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 // ─── Globals ─────────────────────────────────────────────────────────────────
 
@@ -583,80 +586,121 @@ scene.add(cameraHelper);
 let intersectMesh = null;
 let intersectBorder = null;
 
-function rayGroundIntersect(origin, dir) {
-  // Intersect ray with y=0 plane. Returns THREE.Vector3 or null.
-  if (Math.abs(dir.y) < 1e-7) return null;
-  const t = -origin.y / dir.y;
-  if (t < 0) return null;
-  return new THREE.Vector3(
-    origin.x + dir.x * t,
-    0,
-    origin.z + dir.z * t,
-  );
-}
+// Shared material for the pitch-intersection outline. `resolution` must track
+// the canvas size for Line2 to render the width correctly (kept in sync in
+// onResize()).
+const outlineMat = new LineMaterial({
+  color: 0xffd23f,
+  linewidth: 3,            // in pixels
+  transparent: true,
+  depthTest: false,
+});
+outlineMat.resolution.set(window.innerWidth, window.innerHeight);
 
-// NDC corners: BL, BR, TR, TL (CCW from bottom-left)
-const NDC_CORNERS = [
-  new THREE.Vector3(-1, -1, 1),
-  new THREE.Vector3( 1, -1, 1),
-  new THREE.Vector3( 1,  1, 1),
-  new THREE.Vector3(-1,  1, 1),
-];
-
-function computeGroundPolygon(camera) {
+// Compute the frustum's footprint on the ground (y=0) as a closed polygon.
+// We sample densely around the view rectangle's border so the shape stays
+// correct even when part of the view is above the horizon. Rays that point at
+// or above the horizon (dir.y >= 0) never hit the ground, so we push them out
+// to a very large radius along their horizontal direction — effectively the
+// horizon line — which clips cleanly once we intersect with the finite pitch.
+function computeFootprint(camera) {
   const origin = camera.position.clone();
+  const SAMPLES_PER_EDGE = 32;
+  const BIG = 1e5;
+  const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]]; // BL, BR, TR, TL
   const pts = [];
 
-  for (const ndc of NDC_CORNERS) {
-    const world = ndc.clone().unproject(camera);
-    const dir = world.sub(origin).normalize();
-    const hit = rayGroundIntersect(origin, dir);
-    if (hit) pts.push(hit);
-  }
+  for (let e = 0; e < 4; e++) {
+    const c0 = corners[e], c1 = corners[(e + 1) % 4];
+    for (let s = 0; s < SAMPLES_PER_EDGE; s++) {
+      const f = s / SAMPLES_PER_EDGE;
+      const nx = c0[0] + (c1[0] - c0[0]) * f;
+      const ny = c0[1] + (c1[1] - c0[1]) * f;
+      const world = new THREE.Vector3(nx, ny, 1).unproject(camera);
+      const dir = world.sub(origin).normalize();
 
+      if (dir.y < -1e-6) {
+        const t = -origin.y / dir.y;
+        pts.push(new THREE.Vector3(origin.x + dir.x * t, 0, origin.z + dir.z * t));
+      } else {
+        const h = new THREE.Vector3(dir.x, 0, dir.z);
+        if (h.lengthSq() < 1e-9) h.set(0, 0, 1);
+        h.normalize();
+        pts.push(new THREE.Vector3(origin.x + h.x * BIG, 0, origin.z + h.z * BIG));
+      }
+    }
+  }
   return pts;
 }
 
+// Sutherland–Hodgman clip of a polygon (array of Vector3, y ignored) against
+// an axis-aligned rectangle on the XZ plane. Returns the clipped polygon.
+function clipToRect(poly, xmin, xmax, zmin, zmax) {
+  const clipEdge = (input, inside, intersect) => {
+    const out = [];
+    for (let i = 0; i < input.length; i++) {
+      const cur = input[i];
+      const prev = input[(i - 1 + input.length) % input.length];
+      const curIn = inside(cur), prevIn = inside(prev);
+      if (curIn) {
+        if (!prevIn) out.push(intersect(prev, cur));
+        out.push(cur);
+      } else if (prevIn) {
+        out.push(intersect(prev, cur));
+      }
+    }
+    return out;
+  };
+
+  const lerp = (a, b, t) => new THREE.Vector3(
+    a.x + (b.x - a.x) * t, 0, a.z + (b.z - a.z) * t,
+  );
+
+  let p = poly;
+  p = clipEdge(p, v => v.x >= xmin, (a, b) => lerp(a, b, (xmin - a.x) / (b.x - a.x)));
+  p = clipEdge(p, v => v.x <= xmax, (a, b) => lerp(a, b, (xmax - a.x) / (b.x - a.x)));
+  p = clipEdge(p, v => v.z >= zmin, (a, b) => lerp(a, b, (zmin - a.z) / (b.z - a.z)));
+  p = clipEdge(p, v => v.z <= zmax, (a, b) => lerp(a, b, (zmax - a.z) / (b.z - a.z)));
+  return p;
+}
+
 function updateIntersection() {
-  // Remove old meshes
   if (intersectMesh) { scene.remove(intersectMesh); intersectMesh.geometry.dispose(); }
   if (intersectBorder) { scene.remove(intersectBorder); intersectBorder.geometry.dispose(); }
+  intersectMesh = null;
+  intersectBorder = null;
 
-  const pts = computeGroundPolygon(fieldCamera);
-
-  // Update stats
   const areaEl = document.getElementById('stat-area');
   const farEl = document.getElementById('stat-far');
   const nearEl = document.getElementById('stat-near');
 
+  // Frustum footprint on the ground, clipped to the pitch rectangle.
+  const hl = state.fieldL / 2, hw = state.fieldW / 2;
+  const footprint = computeFootprint(fieldCamera);
+  const pts = clipToRect(footprint, -hl, hl, -hw, hw);
+
   if (pts.length < 3) {
-    areaEl.textContent = '—';
+    areaEl.textContent = 'off pitch';
     farEl.textContent = '—';
     nearEl.textContent = '—';
     return;
   }
 
-  // Compute polygon area via shoelace (in XZ)
+  // Polygon area on the visible pitch (shoelace in XZ)
   let area = 0;
-  const n = pts.length;
-  for (let i = 0; i < n; i++) {
-    const a = pts[i], b = pts[(i + 1) % n];
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
     area += a.x * b.z - b.x * a.z;
   }
   area = Math.abs(area) / 2;
 
-  // Near/far from camera position
   const camPos = fieldCamera.position;
   const dists = pts.map(p => camPos.distanceTo(p));
-  const nearD = Math.min(...dists);
-  const farD = Math.max(...dists);
-
   areaEl.textContent = area.toFixed(0) + ' m²';
-  farEl.textContent = farD.toFixed(1) + ' m';
-  nearEl.textContent = nearD.toFixed(1) + ' m';
+  farEl.textContent = Math.max(...dists).toFixed(1) + ' m';
+  nearEl.textContent = Math.min(...dists).toFixed(1) + ' m';
 
-  // Filled polygon (ShapeGeometry in XZ, rotated to ground)
-  // We build in XZ → create Shape using x,z mapped to x,y then rotate -90° around X
+  // Translucent fill
   const shape = new THREE.Shape();
   shape.moveTo(pts[0].x, pts[0].z);
   for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
@@ -664,9 +708,9 @@ function updateIntersection() {
 
   const fillGeo = new THREE.ShapeGeometry(shape);
   const fillMat = new THREE.MeshBasicMaterial({
-    color: 0xff6b35,
+    color: 0xffd23f,
     transparent: true,
-    opacity: 0.22,
+    opacity: 0.18,
     side: THREE.DoubleSide,
     depthWrite: false,
   });
@@ -675,11 +719,14 @@ function updateIntersection() {
   intersectMesh.position.y = 0.08;
   scene.add(intersectMesh);
 
-  // Border line
-  const borderPts = [...pts, pts[0]].map(p => new THREE.Vector3(p.x, 0.1, p.z));
-  const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPts);
-  const borderMat = new THREE.LineBasicMaterial({ color: 0xff8c42, linewidth: 2 });
-  intersectBorder = new THREE.Line(borderGeo, borderMat);
+  // Thick, bright outline (Line2 so width is honoured in pixels)
+  const flat = [];
+  for (const p of pts) flat.push(p.x, 0.12, p.z);
+  flat.push(pts[0].x, 0.12, pts[0].z); // close the loop
+  const lineGeo = new LineGeometry();
+  lineGeo.setPositions(flat);
+  intersectBorder = new Line2(lineGeo, outlineMat);
+  intersectBorder.computeLineDistances();
   scene.add(intersectBorder);
 }
 
@@ -816,6 +863,7 @@ function onResize() {
   renderer.setSize(w, h);
   viewCamera.aspect = w / h;
   viewCamera.updateProjectionMatrix();
+  outlineMat.resolution.set(w, h);
 }
 window.addEventListener('resize', onResize);
 onResize();
