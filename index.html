@@ -573,11 +573,6 @@ const camBodyMat = new THREE.MeshLambertMaterial({ color: 0x2d4a6e });
 const camBody = new THREE.Mesh(camBodyGeo, camBodyMat);
 camGroup.add(camBody);
 
-// Direction arrow (camera looks down local -Z axis)
-const arrowDir = new THREE.Vector3(0, 0, -1);
-const arrowHelper = new THREE.ArrowHelper(arrowDir, new THREE.Vector3(0, 0, 0), 3, 0x58a6ff, 0.6, 0.3);
-camGroup.add(arrowHelper);
-
 // ─── Camera helper (frustum wireframe) ───────────────────────────────────────
 
 let cameraHelper = new THREE.CameraHelper(fieldCamera);
@@ -698,8 +693,8 @@ function updateFieldCamera() {
   // User pitch/yaw/roll are applied on top in YXZ order.
   fieldCamera.rotation.order = 'YXZ';
   fieldCamera.rotation.set(
-    -state.pitch * DEG,           // pitch: negative value = tilts down toward field
-    (180 + state.yaw) * DEG,      // yaw: 180 base + user offset
+    state.pitch * DEG,            // pitch: negative value tilts down toward field
+    (180 + state.yaw) * DEG,      // yaw: 180 base (look toward +Z field) + user offset
     state.roll * DEG,
   );
 
@@ -780,24 +775,18 @@ document.querySelectorAll('.view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const view = btn.dataset.view;
     if (view === 'cam') {
-      // Match viewing camera to field camera position/orientation
-      viewCamera.rotation.copy(fieldCamera.rotation);
-      viewCamera.rotation.order = fieldCamera.rotation.order;
       viewCamera.fov = fieldCamera.fov;
-      viewCamera.aspect = fieldCamera.aspect;
       viewCamera.updateProjectionMatrix();
 
-      // Move camera forward along its viewing direction to avoid being inside the camera mesh
-      const viewDir = new THREE.Vector3(0, 0, -1);
-      viewDir.applyEuler(fieldCamera.rotation);
-      const offset = viewDir.multiplyScalar(2);
-      viewCamera.position.copy(fieldCamera.position).add(offset);
+      // OrbitControls aims the camera at controls.target every frame, so the
+      // orientation is fully determined by target — copying rotation is moot.
+      // Compute the field camera's true forward vector and aim the target along it.
+      const fwd = new THREE.Vector3(0, 0, -1).applyEuler(fieldCamera.rotation);
 
-      controls.target.set(
-        fieldCamera.position.x + Math.sin(fieldCamera.rotation.y) * 30,
-        0,
-        fieldCamera.position.z + Math.cos(fieldCamera.rotation.y) * 30,
-      );
+      // Sit just in front of the camera body (depth 1.8, so clear the front face)
+      // so we look out the lens rather than from inside the box.
+      viewCamera.position.copy(fieldCamera.position).addScaledVector(fwd, 1.5);
+      controls.target.copy(fieldCamera.position).addScaledVector(fwd, 30);
     } else {
       const p = PRESETS[view];
       viewCamera.position.set(...p.pos);
