@@ -294,15 +294,15 @@
     <div class="ctrl">
       <div class="ctrl-label">Length</div>
       <div class="ctrl-row">
-        <input type="range" id="fieldL" min="30" max="120" step="1" value="105">
-        <input type="number" id="fieldL-num" step="1" value="105">
+        <input type="range" id="fieldL" min="13" max="120" step="0.1" value="105">
+        <input type="number" id="fieldL-num" min="13" max="120" step="0.1" value="105">
       </div>
     </div>
     <div class="ctrl">
       <div class="ctrl-label">Width</div>
       <div class="ctrl-row">
-        <input type="range" id="fieldW" min="10" max="90" step="1" value="68">
-        <input type="number" id="fieldW-num" step="1" value="68">
+        <input type="range" id="fieldW" min="6" max="90" step="0.1" value="68">
+        <input type="number" id="fieldW-num" min="6" max="90" step="0.1" value="68">
       </div>
     </div>
   </div>
@@ -817,8 +817,8 @@ wireControl('yaw', 'yaw', fmtDeg);
 wireControl('roll', 'roll', fmtDeg);
 wireControl('hfov', 'hFov', fmtDeg);
 wireControl('vfov', 'vFov', fmtDeg);
-wireControl('fieldL', 'fieldL', v => v.toFixed(0) + ' m');
-wireControl('fieldW', 'fieldW', v => v.toFixed(0) + ' m');
+wireControl('fieldL', 'fieldL', fmtM);
+wireControl('fieldW', 'fieldW', fmtM);
 
 // View presets
 const PRESETS = {
