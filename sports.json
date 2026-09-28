@@ -322,6 +322,28 @@
       ]
     },
     {
+      "id": "padel",
+      "name": "Padel",
+      "size": { "L": 20, "W": 10 },
+      "surface": { "shape": "rect", "color": "#2f6fa3" },
+      "surround": { "color": "#2a2f36", "margin": 2 },
+      "markings": [
+        { "type": "outline" },
+        { "type": "polyline", "mirror": "x", "anchor": ["centre", "stretch"], "points": [[6.95, -5], [6.95, 5]] },
+        { "type": "polyline", "points": [[-7.15, 0], [7.15, 0]] },
+        { "type": "poly3d", "anchor": ["centre", "edge"], "color": "#dddddd",
+          "points": [[0, 0, -5], [0, 0.92, -5], [0, 0.88, 0], [0, 0.92, 5], [0, 0, 5]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "edge"], "color": "#9fb7c9",
+          "points": [[10, 0, -5], [10, 4, -5], [10, 4, 5], [10, 0, 5]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "edge"], "color": "#9fb7c9",
+          "points": [[10, 3, -5], [10, 3, 5]] },
+        { "type": "poly3d", "mirror": "xz", "anchor": ["edge", "edge"], "color": "#9fb7c9",
+          "points": [[10, 3, 5], [8, 3, 5], [8, 2, 5], [6, 2, 5], [6, 0, 5]] },
+        { "type": "poly3d", "mirror": "z", "anchor": ["edge", "edge"], "color": "#6e8494",
+          "points": [[6, 2, 5], [6, 3, 5], [-6, 3, 5], [-6, 2, 5]] }
+      ]
+    },
+    {
       "id": "pickleball",
       "name": "Pickleball",
       "size": { "L": 13.41, "W": 6.1 },
