@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Low
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -14,7 +14,7 @@ The button label "Hurling / Gaelic football" (REQ-012) is long; the user prefers
 
 ## User Experience Requirements
 
-- The button moves to its new alphabetical position (REQ-011): after Football.
+- The button moves to its new alphabetical position (REQ-011): between Futsal and Handball.
 
 ## Technical Requirements
 
@@ -23,8 +23,8 @@ The button label "Hurling / Gaelic football" (REQ-012) is long; the user prefers
 
 ## Acceptance Criteria
 
-- [ ] Button shows "Gaelic football", sorted after Football.
-- [ ] `?sport=gaelic` still loads the pitch.
+- [x] Button shows "Gaelic football", sorted between Futsal and Handball.
+- [x] `?sport=gaelic` still loads the pitch.
 
 ## Dependencies
 
@@ -32,4 +32,5 @@ Amends the name chosen in REQ-012.
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- One-line change to `name` in `sports.json`; id `gaelic` unchanged.
+- Verified in headless Chromium: the button reads "Gaelic football" between Futsal and Handball; `?sport=gaelic` selects and highlights it (the URL keeps `sport=gaelic`); no page errors. A link with only `sport=` takes its size from saved state or the defaults, as each field falls back independently (REQ-008).

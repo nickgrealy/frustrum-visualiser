@@ -147,7 +147,7 @@
     },
     {
       "id": "gaelic",
-      "name": "Hurling / Gaelic football",
+      "name": "Gaelic football",
       "size": { "L": 145, "W": 88 },
       "surface": { "shape": "rect", "color": "#1e5c3a" },
       "surround": { "color": "#1a4731", "margin": 10 },
