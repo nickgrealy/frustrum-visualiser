@@ -11,4 +11,4 @@
 | REQ-007 | Field camera centreline in a strong colour      | Medium   | Completed   | 2026-09-28 | [2026-09-28-camera-centreline-colour.md](2026-09-28-camera-centreline-colour.md)         |
 | REQ-008 | "Share visualisation" link                      | Medium   | Completed   | 2026-09-28 | [2026-09-28-share-visualisation-link.md](2026-09-28-share-visualisation-link.md)         |
 | REQ-009 | Sidebar footer links: Share + Raise a bug       | Low      | Completed   | 2026-09-28 | [2026-09-28-sidebar-footer-links.md](2026-09-28-sidebar-footer-links.md)                 |
-| REQ-010 | Widen camera Roll range to ±90°                 | Low      | Planned     | 2026-09-28 | [2026-09-28-roll-range-90.md](2026-09-28-roll-range-90.md)                               |
+| REQ-010 | Widen camera Roll range to ±90°                 | Low      | In Progress | 2026-09-28 | [2026-09-28-roll-range-90.md](2026-09-28-roll-range-90.md)                               |
