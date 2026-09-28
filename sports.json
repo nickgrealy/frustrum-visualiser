@@ -173,6 +173,29 @@
       ]
     },
     {
+      "id": "handball",
+      "name": "Handball",
+      "size": { "L": 40, "W": 20 },
+      "surface": { "shape": "rect", "color": "#1f6f9e" },
+      "surround": { "color": "#2a2f36", "margin": 3 },
+      "markings": [
+        { "type": "outline" },
+        { "type": "polyline", "points": [[0, -10], [0, 10]], "anchor": ["centre", "stretch"] },
+        { "type": "circle", "mirror": "x", "anchor": ["edge", "centre"], "centre": [20, -1.5], "r": 6, "from": 180, "to": 270 },
+        { "type": "circle", "mirror": "x", "anchor": ["edge", "centre"], "centre": [20, 1.5], "r": 6, "from": 90, "to": 180 },
+        { "type": "polyline", "mirror": "x", "anchor": ["edge", "centre"], "points": [[14, -1.5], [14, 1.5]] },
+        { "type": "circle", "mirror": "x", "dashed": true, "anchor": ["edge", "centre"], "centre": [20, -1.5], "r": 9, "from": 180, "to": 270 },
+        { "type": "circle", "mirror": "x", "dashed": true, "anchor": ["edge", "centre"], "centre": [20, 1.5], "r": 9, "from": 90, "to": 180 },
+        { "type": "polyline", "mirror": "x", "dashed": true, "anchor": ["edge", "centre"], "points": [[11, -1.5], [11, 1.5]] },
+        { "type": "polyline", "mirror": "x", "anchor": ["edge", "centre"], "points": [[13, -0.5], [13, 0.5]] },
+        { "type": "polyline", "mirror": "x", "anchor": ["edge", "centre"], "points": [[16, -0.075], [16, 0.075]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#dddddd",
+          "points": [[20, 0, -1.5], [20, 2, -1.5], [20, 2, 1.5], [20, 0, 1.5]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#888888",
+          "points": [[20, 2, -1.5], [21, 2, -1.5], [21, 0, -1.5], [21, 0, 1.5], [21, 2, 1.5], [20, 2, 1.5]] }
+      ]
+    },
+    {
       "id": "hockey",
       "name": "Hockey",
       "size": { "L": 91.4, "W": 55 },
