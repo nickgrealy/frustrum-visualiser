@@ -438,6 +438,25 @@
         { "type": "poly3d", "anchor": ["centre", "edge"], "color": "#dddddd",
           "points": [[0, 0, -3.355], [0, 0.914, -3.355], [0, 0.86, 0], [0, 0.914, 3.355], [0, 0, 3.355]] }
       ]
+    },
+    {
+      "id": "water-polo",
+      "name": "Water polo",
+      "size": { "L": 33, "W": 25 },
+      "surface": { "shape": "rect", "color": "#2a7ab8" },
+      "surround": { "color": "#5c6670", "margin": 3 },
+      "markings": [
+        { "type": "outline", "color": "#c9d1d9" },
+        { "type": "rect", "dashed": true, "anchor": ["edge", "edge"], "from": [-15, -10], "to": [15, 10] },
+        { "type": "polyline", "mirror": "xz", "anchor": ["edge", "edge"], "points": [[15, 9.4], [15, 10.6]] },
+        { "type": "polyline", "mirror": "xz", "color": "#e03131", "anchor": ["edge", "edge"], "points": [[13, 9.4], [13, 10.6]] },
+        { "type": "polyline", "mirror": "xz", "color": "#f2c94c", "anchor": ["edge", "edge"], "points": [[10, 9.4], [10, 10.6]] },
+        { "type": "polyline", "mirror": "z", "anchor": ["centre", "edge"], "points": [[0, 9.4], [0, 10.6]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#f2f2f2",
+          "points": [[15, 0, -1.5], [15, 0.9, -1.5], [15, 0.9, 1.5], [15, 0, 1.5]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#888888",
+          "points": [[15, 0.9, -1.5], [15.3, 0.9, -1.5], [15.3, 0, -1.5], [15.3, 0, 1.5], [15.3, 0.9, 1.5], [15, 0.9, 1.5]] }
+      ]
     }
   ]
 }
