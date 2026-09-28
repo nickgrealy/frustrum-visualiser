@@ -15,3 +15,4 @@
 | REQ-011 | Show sports alphabetically                      | Low      | Completed   | 2026-09-28 | [2026-09-28-sports-alphabetical.md](2026-09-28-sports-alphabetical.md)                   |
 | REQ-012 | Add more sports (9 new, incl. baseball, TT)     | Medium   | Completed   | 2026-09-28 | [2026-09-28-more-sports.md](2026-09-28-more-sports.md)                                   |
 | REQ-013 | Rename to "Gaelic football"                     | Low      | Completed   | 2026-09-28 | [2026-09-28-rename-gaelic-football.md](2026-09-28-rename-gaelic-football.md)             |
+| REQ-014 | Simple README                                   | Low      | Planned     | 2026-09-28 | [2026-09-28-readme.md](2026-09-28-readme.md)                                             |
