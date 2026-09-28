@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -25,9 +25,9 @@ Athletics stadiums are among the most commonly filmed venues, but there's no ath
 
 ## Acceptance Criteria
 
-- [ ] Track renders as a stadium shape with 8 lanes, infield and finish line.
-- [ ] Coverage stats clip to the stadium outline.
-- [ ] Resizing keeps the lanes concentric, with nothing outside the track.
+- [x] Track renders as a stadium shape with 8 lanes, infield and finish line.
+- [x] Coverage stats clip to the stadium outline.
+- [x] Resizing keeps the lanes concentric, with nothing outside the track.
 
 ## Dependencies
 
@@ -39,4 +39,8 @@ Uses the REQ-004 schema and the REQ-012 `roundrect` surface.
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- Committed in the "Add Athletics track (REQ-015)" commit on `main`. `sports.json` entry only, with no renderer changes.
+- Geometry: 84.39 m straights; lane lines at radii 36.5 + k × 1.22 m (k = 0…7), each a closed polyline (right and left semicircles, 6° steps); the inner kerb line has the grass infield fill; the outline is the `roundrect` surface with radius 46.26 m (= half-width, so a semicircle). Size 176.91 × 92.52 m.
+- Finish line at the end of the home straight (x = +42.195 m) on the −z side, nearest the default camera.
+- Points are edge-anchored in x (curves stay attached to each end) and centre-anchored in z. At non-proportional sizes the lanes scale by s = min(L/L₀, W/W₀) and stay concentric; any leftover width shows as extra track surface outside lane 8.
+- Verified in headless Chromium: top view at 176.91 × 92.52 and 140 × 80, and a close 3D view of the finish line; no page errors.
