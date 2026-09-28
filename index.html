@@ -597,6 +597,20 @@ function surfacePolygon(sport, length, width) {
     }
     return pts;
   }
+  if (sport.surface.shape === 'roundrect') {
+    // Corner radius scales with the markings (uniform s), capped to fit.
+    const s = Math.min(length / sport.size.L, width / sport.size.W);
+    const r = Math.min(sport.surface.radius * s, hl, hw);
+    const pts = [];
+    const corners = [[hl - r, hw - r, 0], [-hl + r, hw - r, 90], [-hl + r, -hw + r, 180], [hl - r, -hw + r, 270]];
+    for (const [cx, cz, start] of corners) {
+      for (let i = 0; i <= 12; i++) {
+        const a = (start + (i / 12) * 90) * DEG;
+        pts.push(new THREE.Vector3(cx + Math.cos(a) * r, 0, cz + Math.sin(a) * r));
+      }
+    }
+    return pts;
+  }
   return [
     new THREE.Vector3(-hl, 0, -hw),
     new THREE.Vector3( hl, 0, -hw),
@@ -737,8 +751,9 @@ function buildField(length, width) {
   };
   addFlat(outline, sport.surface.color, 1);
 
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff });
-  const dashMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.8, gapSize: 0.6 });
+  const lineColor = sport.lineColor || '#ffffff';
+  const lineMat = new THREE.LineBasicMaterial({ color: lineColor });
+  const dashMat = new THREE.LineDashedMaterial({ color: lineColor, dashSize: 0.8, gapSize: 0.6 });
 
   function addLine(points, { color, dashed, y = 0 } = {}) {
     const geo = new THREE.BufferGeometry().setFromPoints(points);
@@ -753,7 +768,7 @@ function buildField(length, width) {
 
   for (const m of sport.markings) {
     if (m.type === 'outline') {
-      addLine([...outline, outline[0]], { y: LINE_Y });
+      addLine([...outline, outline[0]], { color: m.color, y: LINE_Y });
       continue;
     }
     const is3d = m.type === 'poly3d' || m.y;

@@ -256,6 +256,30 @@
       ]
     },
     {
+      "id": "ice-hockey",
+      "name": "Ice hockey",
+      "size": { "L": 60.96, "W": 25.91 },
+      "surface": { "shape": "roundrect", "radius": 8.53, "color": "#e3eef3" },
+      "surround": { "color": "#2a2f36", "margin": 3 },
+      "lineColor": "#c8102e",
+      "markings": [
+        { "type": "outline", "color": "#6b7785" },
+        { "type": "polyline", "points": [[0, -12.955], [0, 12.955]], "anchor": ["centre", "stretch"] },
+        { "type": "polyline", "mirror": "x", "color": "#0033a0", "anchor": ["centre", "stretch"], "points": [[7.62, -12.955], [7.62, 12.955]] },
+        { "type": "polyline", "mirror": "x", "anchor": ["edge", "stretch"], "points": [[27.13, -12.955], [27.13, 12.955]] },
+        { "type": "circle", "color": "#0033a0", "centre": [0, 0], "r": 4.57 },
+        { "type": "circle", "color": "#0033a0", "centre": [0, 0], "r": 0.15 },
+        { "type": "circle", "mirror": "xz", "anchor": ["edge", "centre"], "centre": [21.03, 6.71], "r": 4.57 },
+        { "type": "circle", "mirror": "xz", "anchor": ["edge", "centre"], "centre": [21.03, 6.71], "r": 0.3, "fill": "#c8102e" },
+        { "type": "circle", "mirror": "xz", "anchor": ["centre", "centre"], "centre": [6.1, 6.71], "r": 0.3, "fill": "#c8102e" },
+        { "type": "circle", "mirror": "x", "anchor": ["edge", "centre"], "centre": [27.13, 0], "r": 1.83, "from": 90, "to": 270, "fill": "#9fd3ea" },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#c8102e",
+          "points": [[27.13, 0, -0.915], [27.13, 1.22, -0.915], [27.13, 1.22, 0.915], [27.13, 0, 0.915]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#888888",
+          "points": [[27.13, 1.22, -0.915], [28.25, 0, -0.915], [28.25, 0, 0.915], [27.13, 1.22, 0.915]] }
+      ]
+    },
+    {
       "id": "netball",
       "name": "Netball",
       "size": { "L": 30.5, "W": 15.25 },
