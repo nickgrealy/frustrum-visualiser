@@ -12,7 +12,7 @@ Then open the printed URL (e.g. http://localhost:3000).
 
 ## Features
 
-- 20 sports with accurate field markings: football, cricket, tennis, basketball, ice hockey, baseball, table tennis and more
+- 23 sports and venues with accurate field markings: football, cricket, tennis, basketball, ice hockey, baseball, table tennis, athletics track, swimming pool and more
 - Resize any field; markings rescale sensibly
 - Camera position, pitch/yaw/roll and horizontal/vertical FOV
 - 3D orbit view with Top/Side/Iso/From-camera presets
