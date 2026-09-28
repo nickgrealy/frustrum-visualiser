@@ -657,6 +657,43 @@ function markingPaths(m) {
   }
 }
 
+// Clip a polyline to a convex polygon (XZ plane), returning the inside runs.
+// Points on the boundary count as inside (with a small tolerance), so lines
+// drawn along the field edge are kept.
+function clipPolylineToConvex(pts, poly) {
+  let area = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    area += a.x * b.z - b.x * a.z;
+  }
+  const sign = Math.sign(area), EPS = 1e-6;
+  const runs = [];
+  let run = null;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const p0 = pts[i], p1 = pts[i + 1];
+    const dx = p1.x - p0.x, dz = p1.z - p0.z;
+    // Cyrus–Beck: shrink [t0, t1] against each edge's inside half-plane.
+    let t0 = 0, t1 = 1;
+    for (let j = 0; j < poly.length && t0 <= t1; j++) {
+      const a = poly[j], b = poly[(j + 1) % poly.length];
+      const ex = b.x - a.x, ez = b.z - a.z;
+      const len = Math.hypot(ex, ez) || 1;
+      const f = q => sign * (ex * (q.z - a.z) - ez * (q.x - a.x)) / len + EPS;
+      const f0 = f(p0), d = sign * (ex * dz - ez * dx) / len;
+      if (Math.abs(d) < 1e-12) { if (f0 < 0) t0 = 2; continue; }
+      const t = -f0 / d;
+      if (d > 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t);
+    }
+    if (t0 > t1) { run = null; continue; }
+    const a = new THREE.Vector3(p0.x + dx * t0, p0.y, p0.z + dz * t0);
+    const b = new THREE.Vector3(p0.x + dx * t1, p0.y, p0.z + dz * t1);
+    if (run && t0 === 0) run.push(b);
+    else { run = [a, b]; runs.push(run); }
+    if (t1 < 1) run = null;
+  }
+  return runs;
+}
+
 function buildField(length, width) {
   // Remove old field
   while (fieldGroup.children.length) fieldGroup.remove(fieldGroup.children[0]);
@@ -727,7 +764,16 @@ function buildField(length, width) {
           return new THREE.Vector3(x + fx * ox * s, oy * s, z + fz * oz * s);
         });
         if (m.fill) addFlat(pts, m.fill, 2);
-        if (m.line !== false) addLine(pts, { color: m.color, dashed: m.dashed, y: is3d ? 0 : LINE_Y });
+        if (m.line === false) continue;
+        if (is3d) {
+          addLine(pts, { color: m.color, dashed: m.dashed });
+        } else {
+          // Ground lines are clipped to the surface, so anchored markings that
+          // outgrow a resized field (e.g. AFL 50 m arcs) never spill past it.
+          for (const run of clipPolylineToConvex(pts, outline)) {
+            addLine(run, { color: m.color, dashed: m.dashed, y: LINE_Y });
+          }
+        }
       }
     }
   }

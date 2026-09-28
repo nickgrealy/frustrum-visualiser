@@ -196,6 +196,24 @@
       ]
     },
     {
+      "id": "aussie-rules",
+      "name": "Aussie rules",
+      "size": { "L": 165, "W": 135 },
+      "surface": { "shape": "ellipse", "color": "#1e5c3a" },
+      "surround": { "color": "#1a4731", "margin": 10 },
+      "markings": [
+        { "type": "outline" },
+        { "type": "rect", "from": [-25, -25], "to": [25, 25] },
+        { "type": "circle", "centre": [0, 0], "r": 5 },
+        { "type": "circle", "centre": [0, 0], "r": 1.5 },
+        { "type": "polyline", "points": [[0, -5], [0, 5]] },
+        { "type": "polyline", "mirror": "x", "anchor": ["edge", "centre"], "points": [[82.5, -3.2], [73.5, -3.2], [73.5, 3.2], [82.5, 3.2], [82.5, -3.2]] },
+        { "type": "circle", "mirror": "x", "anchor": ["edge", "centre"], "centre": [82.5, 0], "r": 50, "from": 115.19, "to": 244.81 },
+        { "type": "poly3d", "mirror": "xz", "anchor": ["edge", "centre"], "color": "#dddddd", "points": [[82.5, 0, 3.2], [82.5, 12, 3.2]] },
+        { "type": "poly3d", "mirror": "xz", "anchor": ["edge", "centre"], "color": "#dddddd", "points": [[82.5, 0, 9.6], [82.5, 6, 9.6]] }
+      ]
+    },
+    {
       "id": "basketball",
       "name": "Basketball",
       "size": { "L": 28, "W": 15 },
