@@ -457,6 +457,36 @@
         { "type": "poly3d", "mirror": "x", "anchor": ["edge", "centre"], "color": "#888888",
           "points": [[15, 0.9, -1.5], [15.3, 0.9, -1.5], [15.3, 0, -1.5], [15.3, 0, 1.5], [15.3, 0.9, 1.5], [15, 0.9, 1.5]] }
       ]
+    },
+    {
+      "id": "swimming-pool",
+      "name": "Swimming pool",
+      "size": { "L": 50, "W": 25 },
+      "surface": { "shape": "rect", "color": "#2a7ab8" },
+      "surround": { "color": "#5c6670", "margin": 4 },
+      "markings": [
+        { "type": "outline", "color": "#c9d1d9" },
+        { "type": "rect", "mirror": "z", "anchor": ["edge", "stretch"], "from": [-23, 1.125], "to": [23, 1.375], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "xz", "anchor": ["edge", "stretch"], "from": [22.75, 0.75], "to": [23, 1.75], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "z", "anchor": ["edge", "stretch"], "from": [-23, 3.625], "to": [23, 3.875], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "xz", "anchor": ["edge", "stretch"], "from": [22.75, 3.25], "to": [23, 4.25], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "z", "anchor": ["edge", "stretch"], "from": [-23, 6.125], "to": [23, 6.375], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "xz", "anchor": ["edge", "stretch"], "from": [22.75, 5.75], "to": [23, 6.75], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "z", "anchor": ["edge", "stretch"], "from": [-23, 8.625], "to": [23, 8.875], "fill": "#1d3557", "line": false },
+        { "type": "rect", "mirror": "xz", "anchor": ["edge", "stretch"], "from": [22.75, 8.25], "to": [23, 9.25], "fill": "#1d3557", "line": false },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, -10], [25, -10]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, -7.5], [25, -7.5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, -5], [25, -5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, -2.5], [25, -2.5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, 0], [25, 0]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, 2.5], [25, 2.5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, 5], [25, 5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, 7.5], [25, 7.5]] },
+        { "type": "polyline", "dashed": true, "anchor": ["stretch", "stretch"], "points": [[-25, 10], [25, 10]] },
+        { "type": "polyline", "mirror": "x", "dashed": true, "color": "#e03131", "anchor": ["edge", "stretch"], "points": [[10, -12.5], [10, 12.5]] },
+        { "type": "poly3d", "mirror": "x", "anchor": ["edge", "edge"], "color": "#f2c94c",
+          "points": [[20, 0, -12.5], [20, 1.8, -12.5], [20, 1.8, 12.5], [20, 0, 12.5]] }
+      ]
     }
   ]
 }
