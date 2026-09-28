@@ -217,6 +217,10 @@
     .field-btn:hover { background: #2d333b; }
     .field-btn.active { border-color: #58a6ff; color: #c9d1d9; }
     .field-btn small { display: block; color: #6e7681; }
+    .field-error {
+      grid-column: 1 / -1; font-size: 10px; line-height: 1.5; color: #f0883e;
+      border: 1px solid #5a3a1e; border-radius: 3px; padding: 6px;
+    }
   </style>
 </head>
 <body>
@@ -317,7 +321,7 @@
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Preset</div>
+      <div class="ctrl-label">Sport</div>
       <div class="field-presets" id="field-presets"></div>
     </div>
   </div>
@@ -377,6 +381,7 @@ const state = {
   pitch: -15, yaw: 0, roll: 0,
   hFov: 90, vFov: 55,
   fieldL: 105, fieldW: 68,
+  sport: 'football',
 };
 
 // Load from localStorage if available
@@ -391,6 +396,32 @@ const state = {
     console.warn('Failed to load state from localStorage:', e);
   }
 })();
+
+// ─── Sport definitions (sports.json) ─────────────────────────────────────────
+
+// Used when sports.json can't be loaded: a plain rectangle, no markings.
+const FALLBACK_SPORT = {
+  id: 'plain', name: 'Plain',
+  size: { L: 105, W: 68 },
+  surface: { shape: 'rect', color: '#1e5c3a' },
+  surround: { color: '#1a4731', margin: 10 },
+  markings: [{ type: 'outline' }],
+};
+
+let SPORTS = [];
+let sportsError = null;
+try {
+  const res = await fetch('sports.json');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  SPORTS = (await res.json()).sports;
+} catch (e) {
+  sportsError = e;
+  console.warn('Failed to load sports.json:', e);
+}
+
+function currentSport() {
+  return SPORTS.find(sp => sp.id === state.sport) || SPORTS[0] || FALLBACK_SPORT;
+}
 
 // Save state to localStorage
 function saveState() {
@@ -438,143 +469,163 @@ controls.dampingFactor = 0.08;
 const fieldCamera = new THREE.PerspectiveCamera(55, 1.636, 0.3, 300);
 fieldCamera.layers.set(0);
 
-// ─── Soccer field geometry ───────────────────────────────────────────────────
+// ─── Field geometry ──────────────────────────────────────────────────────────
 
 let fieldGroup = new THREE.Group();
 scene.add(fieldGroup);
+
+// Outline of the playing surface (world coords, XZ plane) for the given size.
+function surfacePolygon(sport, length, width) {
+  const hl = length / 2, hw = width / 2;
+  if (sport.surface.shape === 'ellipse') {
+    const pts = [];
+    for (let i = 0; i < 96; i++) {
+      const a = (i / 96) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * hl, 0, Math.sin(a) * hw));
+    }
+    return pts;
+  }
+  return [
+    new THREE.Vector3(-hl, 0, -hw),
+    new THREE.Vector3( hl, 0, -hw),
+    new THREE.Vector3( hl, 0,  hw),
+    new THREE.Vector3(-hl, 0,  hw),
+  ];
+}
+
+// Anchored scaling: marking sizes scale uniformly by s = min(L/L0, W/W0);
+// each position axis is anchored to the centre, the nearest edge, or stretched.
+function makeMapper(sport, length, width) {
+  const L0 = sport.size.L, W0 = sport.size.W;
+  const s = Math.min(length / L0, width / W0);
+  const axis = (v, mode, h0, h, k) => {
+    if (mode === 'edge') return Math.sign(v) * (h - (h0 - Math.abs(v)) * s);
+    if (mode === 'stretch') return v * k;
+    return v * s; // 'centre'
+  };
+  return {
+    s,
+    map: (x, z, [ax, az]) => [
+      axis(x, ax, L0 / 2, length / 2, length / L0),
+      axis(z, az, W0 / 2, width / 2, width / W0),
+    ],
+  };
+}
+
+const MIRRORS = { x: [[1, 1], [-1, 1]], z: [[1, 1], [1, -1]], xz: [[1, 1], [-1, 1], [1, -1], [-1, -1]] };
+
+// Expand a marking into vertex paths. A vertex is a base point (bx, bz) that
+// goes through the anchor mapping, plus an offset (ox, oy, oz) scaled by s.
+function markingPaths(m) {
+  const anchor = m.anchor || ['centre', 'centre'];
+  const v = (bx, bz, a, ox = 0, oy = 0, oz = 0) => ({ bx, bz, a, ox, oy, oz });
+  switch (m.type) {
+    case 'polyline':
+      return [m.points.map(([x, z], i) => v(x, z, m.anchors?.[i] || anchor))];
+    case 'poly3d':
+      return [m.points.map(([x, y, z], i) => v(x, z, m.anchors?.[i] || anchor, 0, y, 0))];
+    case 'rect': {
+      const [x1, z1] = m.from, [x2, z2] = m.to;
+      return [[v(x1, z1, anchor), v(x2, z1, anchor), v(x2, z2, anchor), v(x1, z2, anchor), v(x1, z1, anchor)]];
+    }
+    case 'circle': {
+      const from = m.from ?? 0, to = m.to ?? 360;
+      const n = Math.max(8, Math.ceil(Math.abs(to - from) / 5));
+      const [cx, cz] = m.centre;
+      const pts = [];
+      for (let i = 0; i <= n; i++) {
+        const a = (from + (to - from) * (i / n)) * DEG;
+        pts.push(v(cx, cz, anchor, Math.cos(a) * m.r, m.y || 0, Math.sin(a) * m.r));
+      }
+      return [pts];
+    }
+    default:
+      console.warn('Unknown marking type:', m.type);
+      return [];
+  }
+}
 
 function buildField(length, width) {
   // Remove old field
   while (fieldGroup.children.length) fieldGroup.remove(fieldGroup.children[0]);
 
-  const hl = length / 2, hw = width / 2;
-  // Scale all FIFA markings proportionally to pitch length (standard = 105m).
-  const s = length / 105;
+  const sport = currentSport();
+  const { s, map } = makeMapper(sport, length, width);
+  const LINE_Y = 0.05;
 
-  // Green grass plane
-  const grassGeo = new THREE.PlaneGeometry(length + 20, width + 20);
-  const grassMat = new THREE.MeshLambertMaterial({ color: 0x1a4731 });
-  const grass = new THREE.Mesh(grassGeo, grassMat);
-  grass.rotation.x = -Math.PI / 2;
-  fieldGroup.add(grass);
+  // Surround (grass / floor around the playing area)
+  const margin = [].concat(sport.surround?.margin ?? 10);
+  const mx = margin[0], mz = margin[1] ?? margin[0];
+  const surroundL = length + 2 * mx, surroundW = width + 2 * mz;
+  const surround = new THREE.Mesh(
+    new THREE.PlaneGeometry(surroundL, surroundW),
+    new THREE.MeshLambertMaterial({ color: sport.surround?.color || '#1a4731' }),
+  );
+  surround.rotation.x = -Math.PI / 2;
+  fieldGroup.add(surround);
 
-  // Slightly lighter inner pitch
-  const pitchGeo = new THREE.PlaneGeometry(length, width);
-  const pitchMat = new THREE.MeshLambertMaterial({ color: 0x1e5c3a });
-  const pitch = new THREE.Mesh(pitchGeo, pitchMat);
-  pitch.rotation.x = -Math.PI / 2;
-  pitch.position.y = 0.01;
-  fieldGroup.add(pitch);
+  // Playing surface
+  const outline = surfacePolygon(sport, length, width);
+  const flatShape = pts => {
+    const shape = new THREE.Shape();
+    shape.moveTo(pts[0].x, pts[0].z);
+    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
+    shape.closePath();
+    return new THREE.ShapeGeometry(shape);
+  };
+  // +90° about X maps shape (x, y) onto world (x, z) without mirroring z.
+  // Flat fills share the surface height; polygonOffset (not a y gap) layers
+  // them, so they don't z-fight with each other or the coverage overlay.
+  const addFlat = (pts, color, layer) => {
+    const mat = new THREE.MeshLambertMaterial({
+      color, side: THREE.DoubleSide,
+      polygonOffset: true, polygonOffsetFactor: -layer, polygonOffsetUnits: -layer,
+    });
+    const mesh = new THREE.Mesh(flatShape(pts), mat);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.y = 0.01;
+    fieldGroup.add(mesh);
+  };
+  addFlat(outline, sport.surface.color, 1);
 
-  // White line material
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff });
+  const dashMat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.8, gapSize: 0.6 });
 
-  function addLines(points, loop = false) {
+  function addLine(points, { color, dashed, y = 0 } = {}) {
     const geo = new THREE.BufferGeometry().setFromPoints(points);
-    const line = loop ? new THREE.LineLoop(geo, lineMat) : new THREE.Line(geo, lineMat);
-    line.position.y = 0.05;
+    const mat = color
+      ? new THREE.LineBasicMaterial({ color })
+      : dashed ? dashMat : lineMat;
+    const line = new THREE.Line(geo, mat);
+    if (dashed) line.computeLineDistances();
+    line.position.y = y;
     fieldGroup.add(line);
   }
 
-  // Outer boundary
-  addLines([
-    new THREE.Vector3(-hl, 0, -hw),
-    new THREE.Vector3( hl, 0, -hw),
-    new THREE.Vector3( hl, 0,  hw),
-    new THREE.Vector3(-hl, 0,  hw),
-  ], true);
-
-  // Halfway line
-  addLines([
-    new THREE.Vector3(0, 0, -hw),
-    new THREE.Vector3(0, 0,  hw),
-  ]);
-
-  // Centre circle (9.15m radius)
-  {
-    const r = 9.15 * s;
-    const pts = [];
-    for (let i = 0; i <= 64; i++) {
-      const a = (i / 64) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+  for (const m of sport.markings) {
+    if (m.type === 'outline') {
+      addLine([...outline, outline[0]], { y: LINE_Y });
+      continue;
     }
-    addLines(pts);
-  }
-
-  // Centre spot
-  {
-    const r = 0.3 * s;
-    const pts = [];
-    for (let i = 0; i <= 24; i++) {
-      const a = (i / 24) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
-    }
-    addLines(pts);
-  }
-
-  // Penalty areas (16.5m deep, 40.32m wide)
-  for (const side of [-1, 1]) {
-    const gx = side * hl;
-    const pw = (40.32 / 2) * s, pd = 16.5 * s;
-    addLines([
-      new THREE.Vector3(gx, 0, -pw),
-      new THREE.Vector3(gx - side * pd, 0, -pw),
-      new THREE.Vector3(gx - side * pd, 0,  pw),
-      new THREE.Vector3(gx, 0,  pw),
-    ], false);
-
-    // Goal area (5.5m deep, 18.32m wide)
-    const gw = (18.32 / 2) * s, gd = 5.5 * s;
-    addLines([
-      new THREE.Vector3(gx, 0, -gw),
-      new THREE.Vector3(gx - side * gd, 0, -gw),
-      new THREE.Vector3(gx - side * gd, 0,  gw),
-      new THREE.Vector3(gx, 0,  gw),
-    ], false);
-
-    // Penalty spot
-    {
-      const px = gx - side * 11 * s;
-      const r = 0.3 * s;
-      const pts = [];
-      for (let i = 0; i <= 16; i++) {
-        const a = (i / 16) * Math.PI * 2;
-        pts.push(new THREE.Vector3(px + Math.cos(a) * r, 0, Math.sin(a) * r));
+    const is3d = m.type === 'poly3d' || m.y;
+    for (const [fx, fz] of MIRRORS[m.mirror] || [[1, 1]]) {
+      for (const path of markingPaths(m)) {
+        const pts = path.map(({ bx, bz, a, ox, oy, oz }) => {
+          const [x, z] = map(fx * bx, fz * bz, a);
+          return new THREE.Vector3(x + fx * ox * s, oy * s, z + fz * oz * s);
+        });
+        if (m.fill) addFlat(pts, m.fill, 2);
+        if (m.line !== false) addLine(pts, { color: m.color, dashed: m.dashed, y: is3d ? 0 : LINE_Y });
       }
-      addLines(pts);
     }
-
-    // Goals (7.32m wide, 2.44m tall)
-    const goalW = (7.32 / 2) * s, goalH = 2.44 * s, goalD = 2 * s;
-    const goalMat = new THREE.LineBasicMaterial({ color: 0xdddddd });
-    const goalPts = [
-      new THREE.Vector3(gx, 0, -goalW),
-      new THREE.Vector3(gx + side * goalD, 0, -goalW),
-      new THREE.Vector3(gx + side * goalD, goalH, -goalW),
-      new THREE.Vector3(gx, goalH, -goalW),
-      new THREE.Vector3(gx, goalH,  goalW),
-      new THREE.Vector3(gx + side * goalD, goalH,  goalW),
-      new THREE.Vector3(gx + side * goalD, 0,  goalW),
-      new THREE.Vector3(gx, 0,  goalW),
-    ];
-    const goalGeo = new THREE.BufferGeometry().setFromPoints(goalPts);
-    fieldGroup.add(new THREE.Line(goalGeo, goalMat));
-
-    // Goal crossbar
-    const crossPts = [
-      new THREE.Vector3(gx, goalH, -goalW),
-      new THREE.Vector3(gx, goalH,  goalW),
-    ];
-    const crossGeo = new THREE.BufferGeometry().setFromPoints(crossPts);
-    fieldGroup.add(new THREE.Line(crossGeo, goalMat));
   }
 
-  // Grid on grass (faint)
+  // Grid on surround (faint)
   const gridMat = new THREE.LineBasicMaterial({ color: 0x1a4020, transparent: true, opacity: 0.5 });
-  for (let x = -Math.floor((length + 20) / 2); x <= Math.ceil((length + 20) / 2); x += 5) {
+  for (let x = -Math.floor(surroundL / 2); x <= Math.ceil(surroundL / 2); x += 5) {
     const g = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(x, 0, -(width + 20) / 2),
-      new THREE.Vector3(x, 0,  (width + 20) / 2),
+      new THREE.Vector3(x, 0, -surroundW / 2),
+      new THREE.Vector3(x, 0,  surroundW / 2),
     ]);
     const l = new THREE.Line(g, gridMat);
     l.position.y = 0.001;
@@ -649,34 +700,33 @@ function computeFootprint(camera) {
 }
 
 // Sutherland–Hodgman clip of a polygon (array of Vector3, y ignored) against
-// an axis-aligned rectangle on the XZ plane. Returns the clipped polygon.
-function clipToRect(poly, xmin, xmax, zmin, zmax) {
-  const clipEdge = (input, inside, intersect) => {
-    const out = [];
-    for (let i = 0; i < input.length; i++) {
-      const cur = input[i];
-      const prev = input[(i - 1 + input.length) % input.length];
-      const curIn = inside(cur), prevIn = inside(prev);
-      if (curIn) {
-        if (!prevIn) out.push(intersect(prev, cur));
-        out.push(cur);
-      } else if (prevIn) {
-        out.push(intersect(prev, cur));
+// a convex polygon on the XZ plane (the playing surface). Returns the clipped polygon.
+function clipToConvex(poly, clip) {
+  // Orientation of the clip polygon, so "inside" works for either winding.
+  let area = 0;
+  for (let i = 0; i < clip.length; i++) {
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    area += a.x * b.z - b.x * a.z;
+  }
+  const sign = Math.sign(area);
+
+  let out = poly;
+  for (let i = 0; i < clip.length && out.length; i++) {
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    const side = p => sign * ((b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x));
+    const input = out;
+    out = [];
+    for (let j = 0; j < input.length; j++) {
+      const cur = input[j], prev = input[(j - 1 + input.length) % input.length];
+      const dc = side(cur), dp = side(prev);
+      if ((dc >= 0) !== (dp >= 0)) {
+        const t = dp / (dp - dc);
+        out.push(new THREE.Vector3(prev.x + (cur.x - prev.x) * t, 0, prev.z + (cur.z - prev.z) * t));
       }
+      if (dc >= 0) out.push(cur);
     }
-    return out;
-  };
-
-  const lerp = (a, b, t) => new THREE.Vector3(
-    a.x + (b.x - a.x) * t, 0, a.z + (b.z - a.z) * t,
-  );
-
-  let p = poly;
-  p = clipEdge(p, v => v.x >= xmin, (a, b) => lerp(a, b, (xmin - a.x) / (b.x - a.x)));
-  p = clipEdge(p, v => v.x <= xmax, (a, b) => lerp(a, b, (xmax - a.x) / (b.x - a.x)));
-  p = clipEdge(p, v => v.z >= zmin, (a, b) => lerp(a, b, (zmin - a.z) / (b.z - a.z)));
-  p = clipEdge(p, v => v.z <= zmax, (a, b) => lerp(a, b, (zmax - a.z) / (b.z - a.z)));
-  return p;
+  }
+  return out;
 }
 
 function updateIntersection() {
@@ -690,7 +740,6 @@ function updateIntersection() {
   const nearEl = document.getElementById('stat-near');
 
   // Full frustum footprint on the ground (not clipped to pitch).
-  const hl = state.fieldL / 2, hw = state.fieldW / 2;
   const pts = computeFootprint(fieldCamera);
 
   if (pts.length < 3) {
@@ -701,7 +750,7 @@ function updateIntersection() {
   }
 
   // Stats reflect the on-pitch coverage (clip footprint to pitch for this).
-  const pitchPts = clipToRect(pts, -hl, hl, -hw, hw);
+  const pitchPts = clipToConvex(pts, surfacePolygon(currentSport(), state.fieldL, state.fieldW));
   if (pitchPts.length >= 3) {
     let area = 0;
     for (let i = 0; i < pitchPts.length; i++) {
@@ -732,6 +781,7 @@ function updateIntersection() {
     transparent: true,
     opacity: 0.18,
     side: THREE.DoubleSide,
+    depthTest: false, // ground overlay: always over the surface and its fills
     depthWrite: false,
   });
   // +90° about X maps the shape's (x, z) plane onto world (x, z) without
@@ -835,53 +885,42 @@ wireControl('vfov', 'vFov', fmtDeg);
 wireControl('fieldL', 'fieldL', fmtM);
 wireControl('fieldW', 'fieldW', fmtM);
 
-// Field size presets (playing area, excluding run-off)
-const FIELD_PRESETS = [
-  { name: 'Football',   L: 105,   W: 68    }, // FIFA recommended
-  { name: 'Futsal',     L: 40,    W: 20    },
-  { name: 'Rugby',      L: 100,   W: 70    }, // try line to try line
-  { name: 'Cricket',    L: 150,   W: 135   }, // boundary oval, typical international ground
-  { name: 'Hockey',     L: 91.4,  W: 55    },
-  { name: 'Basketball', L: 28,    W: 15    }, // FIBA
-  { name: 'Netball',    L: 30.5,  W: 15.3  },
-  { name: 'Tennis',     L: 23.8,  W: 11    }, // doubles court
-  { name: 'Volleyball', L: 18,    W: 9     },
-  { name: 'Badminton',  L: 13.4,  W: 6.1   },
-  { name: 'Pickleball', L: 13.4,  W: 6.1   },
-];
-
+// Sport presets (from sports.json)
 const presetWrap = document.getElementById('field-presets');
 const fieldInputs = ['fieldL', 'fieldW'].map(id => document.getElementById(id));
 
-function setField(L, W) {
-  [L, W].forEach((v, i) => {
-    fieldInputs[i].value = v;
-    fieldInputs[i].dispatchEvent(new Event('input'));
-  });
-}
-
-function markActivePreset() {
+function markActiveSport() {
   presetWrap.querySelectorAll('.field-btn').forEach(btn => {
-    btn.classList.toggle('active',
-      +btn.dataset.l === state.fieldL && +btn.dataset.w === state.fieldW);
+    btn.classList.toggle('active', btn.dataset.sport === currentSport().id);
   });
 }
 
-FIELD_PRESETS.forEach(({ name, L, W }) => {
+function selectSport(sport) {
+  state.sport = sport.id;
+  // Go through the number inputs' change path (rebuild, stats, save); unlike
+  // the sliders they don't snap to the 0.1 m step, so exact sizes survive.
+  [sport.size.L, sport.size.W].forEach((v, i) => {
+    const num = document.getElementById(fieldInputs[i].id + '-num');
+    num.value = v;
+    num.dispatchEvent(new Event('change'));
+  });
+  markActiveSport();
+}
+
+if (sportsError) {
+  presetWrap.innerHTML = `<div class="field-error">Couldn't load <code>sports.json</code>.
+    Serve this folder over HTTP (e.g. <code>npx serve</code>) instead of opening the file directly.</div>`;
+}
+
+SPORTS.forEach(sport => {
   const btn = document.createElement('button');
   btn.className = 'field-btn';
-  btn.dataset.l = L;
-  btn.dataset.w = W;
-  btn.innerHTML = `${name}<small>${L} × ${W} m</small>`;
-  btn.addEventListener('click', () => setField(L, W));
+  btn.dataset.sport = sport.id;
+  btn.innerHTML = `${sport.name}<small>${sport.size.L} × ${sport.size.W} m</small>`;
+  btn.addEventListener('click', () => selectSport(sport));
   presetWrap.appendChild(btn);
 });
-
-fieldInputs.forEach(el => {
-  el.addEventListener('input', markActivePreset);
-  document.getElementById(el.id + '-num').addEventListener('change', markActivePreset);
-});
-markActivePreset();
+markActiveSport();
 
 // View presets
 const PRESETS = {
