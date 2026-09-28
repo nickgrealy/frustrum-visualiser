@@ -12,3 +12,4 @@
 | REQ-008 | "Share visualisation" link                      | Medium   | Completed   | 2026-09-28 | [2026-09-28-share-visualisation-link.md](2026-09-28-share-visualisation-link.md)         |
 | REQ-009 | Sidebar footer links: Share + Raise a bug       | Low      | Completed   | 2026-09-28 | [2026-09-28-sidebar-footer-links.md](2026-09-28-sidebar-footer-links.md)                 |
 | REQ-010 | Widen camera Roll range to ±90°                 | Low      | Completed   | 2026-09-28 | [2026-09-28-roll-range-90.md](2026-09-28-roll-range-90.md)                               |
+| REQ-011 | Show sports alphabetically                      | Low      | Planned     | 2026-09-28 | [2026-09-28-sports-alphabetical.md](2026-09-28-sports-alphabetical.md)                   |
