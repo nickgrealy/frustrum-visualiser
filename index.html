@@ -597,6 +597,11 @@ function surfacePolygon(sport, length, width) {
     }
     return pts;
   }
+  if (sport.surface.shape === 'polygon') {
+    // Convex outline in standard-size metres, stretched to the field size.
+    const kx = length / sport.size.L, kz = width / sport.size.W;
+    return sport.surface.points.map(([x, z]) => new THREE.Vector3(x * kx, 0, z * kz));
+  }
   if (sport.surface.shape === 'roundrect') {
     // Corner radius scales with the markings (uniform s), capped to fit.
     const s = Math.min(length / sport.size.L, width / sport.size.W);
@@ -750,6 +755,7 @@ function buildField(length, width) {
     fieldGroup.add(mesh);
   };
   addFlat(outline, sport.surface.color, 1);
+  let fillLayer = 2; // each later fill draws above earlier ones
 
   const lineColor = sport.lineColor || '#ffffff';
   const lineMat = new THREE.LineBasicMaterial({ color: lineColor });
@@ -778,7 +784,7 @@ function buildField(length, width) {
           const [x, z] = map(fx * bx, fz * bz, a);
           return new THREE.Vector3(x + fx * ox * s, oy * s, z + fz * oz * s);
         });
-        if (m.fill) addFlat(pts, m.fill, 2);
+        if (m.fill) addFlat(pts, m.fill, fillLayer++);
         if (m.line === false) continue;
         if (is3d) {
           addLine(pts, { color: m.color, dashed: m.dashed });
