@@ -10,7 +10,7 @@ The field camera's centreline (the three.js CameraHelper "target" line from the 
 
 ## Functional Requirements
 
-- Draw the centreline in a strong colour that stands out from white markings and every sport's surface colour (green, blue, orange, wood).
+- Draw the centreline in red (`#ff3b30`, chosen by user 2026-09-28): it stands out from white markings and every sport's surface colour (green, blue, orange, wood), and matches the helper's existing red cone lines.
 
 ## User Experience Requirements
 
@@ -23,8 +23,8 @@ The field camera's centreline (the three.js CameraHelper "target" line from the 
 
 ## Acceptance Criteria
 
-- [ ] The centreline is drawn in the chosen colour on every sport's surface.
-- [ ] It stays that colour after moving the camera.
+- [ ] The centreline is drawn in red on every sport's surface.
+- [ ] It stays red after moving the camera.
 
 ## Dependencies
 

@@ -20,7 +20,7 @@ The field camera settings survive a reload, but the 3D viewing camera (the orbit
 
 ## Technical Requirements
 
-- The viewing camera is an OrbitControls camera: its orientation is fully defined by position + target, so those (not pitch/yaw/roll angles) are stored. (Pending user confirmation.)
+- The viewing camera is an OrbitControls camera: its orientation is fully defined by position + target, so those (not pitch/yaw/roll angles) are stored. Confirmed by user 2026-09-28.
 - Saves are debounced; OrbitControls emits `change` every frame while damping.
 - Stored alongside the existing `frustum-viz-state` object; older saved state without view fields must still load.
 

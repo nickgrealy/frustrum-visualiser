@@ -13,14 +13,19 @@ There is no way to send someone the current setup; they would have to re-enter e
 - A "Share visualisation" `<a href>` link whose URL points to this page with query parameters for every setting: sport, field length/width, field camera position (x, y, z), orientation (pitch, yaw, roll), H/V FOV, and the viewing camera (position, target, FOV).
 - On page load, settings come from query parameters if present, then localStorage, then defaults, field by field.
 - The link works wherever the site is hosted (built from the current page's URL).
+- Every change (controls, sport, 3D view) updates the address bar in place (`history.replaceState`, no new history entries), so the address bar is always a shareable link to the current setup.
+- Opening a link applies its settings and saves them to localStorage.
 
 ## User Experience Requirements
 
-- Link placement, click behaviour, and what happens to the address bar after opening a shared link: pending user decision (see design).
+- Decided with user 2026-09-28:
+  - Plain clickable `<a href>` labelled "Share visualisation" whose `href` is always the current share URL. No clipboard handling; users copy it via right-click or the address bar.
+  - Placed at the bottom of the sidebar, below Viewing Camera, with a share icon in the REQ-005 style.
+  - The address bar updates live on every change (see Functional Requirements).
 
 ## Technical Requirements
 
-- Readable, compact parameter names; numbers rounded to at most 2 decimal places.
+- Parameters: `sport`, `L`, `W`, `cam=x,y,z`, `rot=pitch,yaw,roll`, `fov=h,v`, `view=x,y,z`, `look=x,y,z`, `vfov`. Numbers are rounded to at most 2 decimal places.
 - Invalid or out-of-range values are ignored (fall back) or clamped to the control ranges; an unknown sport falls back to the default.
 - No server component; still a static site.
 
@@ -29,6 +34,8 @@ There is no way to send someone the current setup; they would have to re-enter e
 - [ ] Opening the generated link in a fresh browser (empty localStorage) reproduces the same field, camera, and 3D view.
 - [ ] A link with only some parameters fills the rest from localStorage/defaults.
 - [ ] Malformed parameters don't break the page.
+- [ ] Changing any control or orbiting updates the address bar without adding browser history entries.
+- [ ] The link's `href` always matches the address bar.
 
 ## Dependencies
 
