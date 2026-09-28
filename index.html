@@ -52,6 +52,11 @@
     .section-title { display: flex; align-items: center; gap: 6px; }
     #stats .stat { display: flex; align-items: center; gap: 6px; }
     #stats .ico { color: #58a6ff; }
+    .share-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #58a6ff; text-decoration: none;
+    }
+    .share-link:hover { text-decoration: underline; }
 
     .section-title {
       font-size: 11px;
@@ -354,6 +359,8 @@
     </div>
   </div>
 
+  <a id="share-link" class="share-link" href=""><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share visualisation</a>
+
   <div style="font-size:10px;color:#484f58;line-height:1.6;margin-top:8px;">
     Drag to orbit · Scroll to zoom · Right-drag to pan
   </div>
@@ -395,9 +402,11 @@ const state = {
   hFov: 90, vFov: 55,
   fieldL: 105, fieldW: 68,
   sport: 'football',
+  // Viewing (orbit) camera: position + look-at target fully define its orientation.
+  viewPos: [0, 90, -100], viewTarget: [0, 0, 0], viewFov: 50,
 };
 
-// Load from localStorage if available
+// Load order, per field: defaults → localStorage → URL query params.
 (() => {
   try {
     const saved = localStorage.getItem('frustum-viz-state');
@@ -409,6 +418,61 @@ const state = {
     console.warn('Failed to load state from localStorage:', e);
   }
 })();
+
+// Share-link query params ⇄ state. Vector params are comma-separated.
+const PARAMS = {
+  L: ['fieldL'], W: ['fieldW'],
+  cam: ['camX', 'camY', 'camZ'],
+  rot: ['pitch', 'yaw', 'roll'],
+  fov: ['hFov', 'vFov'],
+};
+// State keys backed by a slider, so URL values can be clamped to its range.
+const SLIDER_IDS = {
+  camX: 'camX', camY: 'camY', camZ: 'camZ', pitch: 'pitch', yaw: 'yaw', roll: 'roll',
+  hFov: 'hfov', vFov: 'vfov', fieldL: 'fieldL', fieldW: 'fieldW',
+};
+const round2 = v => Math.round(v * 100) / 100;
+
+// Returns n finite numbers from "a,b,c", or null if malformed.
+function parseNums(str, n) {
+  if (str == null) return null;
+  const parts = str.split(',');
+  if (parts.length !== n || parts.some(x => x.trim() === '')) return null;
+  const nums = parts.map(Number);
+  return nums.every(Number.isFinite) ? nums : null;
+}
+
+// Sport is validated after sports.json loads; unknown ids keep the saved sport.
+let urlSport = null;
+(() => {
+  const q = new URLSearchParams(location.search);
+  for (const [param, keys] of Object.entries(PARAMS)) {
+    const nums = parseNums(q.get(param), keys.length);
+    if (!nums) continue;
+    keys.forEach((key, i) => {
+      const el = document.getElementById(SLIDER_IDS[key]);
+      state[key] = Math.min(+el.max, Math.max(+el.min, nums[i]));
+    });
+  }
+  const view = parseNums(q.get('view'), 3), look = parseNums(q.get('look'), 3);
+  if (view) state.viewPos = view;
+  if (look) state.viewTarget = look;
+  const vfov = parseNums(q.get('vfov'), 1);
+  if (vfov) state.viewFov = Math.min(120, Math.max(5, vfov[0]));
+  urlSport = q.get('sport');
+})();
+
+function shareQuery() {
+  const q = new URLSearchParams();
+  q.set('sport', state.sport);
+  for (const [param, keys] of Object.entries(PARAMS)) {
+    q.set(param, keys.map(k => round2(state[k])).join(','));
+  }
+  q.set('view', state.viewPos.map(round2).join(','));
+  q.set('look', state.viewTarget.map(round2).join(','));
+  q.set('vfov', round2(state.viewFov));
+  return q.toString().replace(/%2C/g, ','); // keep commas readable
+}
 
 // ─── Sport definitions (sports.json) ─────────────────────────────────────────
 
@@ -432,18 +496,40 @@ try {
   console.warn('Failed to load sports.json:', e);
 }
 
+if (urlSport && SPORTS.some(sp => sp.id === urlSport)) state.sport = urlSport;
+
 function currentSport() {
   return SPORTS.find(sp => sp.id === state.sport) || SPORTS[0] || FALLBACK_SPORT;
 }
 
 // Save state to localStorage
-function saveState() {
+// Persist state everywhere it lives: localStorage, the address bar (replaced in
+// place, so no history entries) and the share link's href.
+const shareLink = document.getElementById('share-link');
+function flushState() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
   try {
     localStorage.setItem('frustum-viz-state', JSON.stringify(state));
   } catch (e) {
     console.warn('Failed to save state to localStorage:', e);
   }
+  try {
+    history.replaceState(null, '', `${location.pathname}?${shareQuery()}${location.hash}`);
+  } catch (e) {
+    console.warn('Failed to update address bar:', e);
+  }
+  shareLink.href = location.href;
 }
+
+// Slider drags and orbiting change state every frame; throttle saves (Safari
+// also rejects more than ~100 replaceState calls per 30 s). The trailing save
+// reads state when it fires, so the final value is always written.
+let saveTimer = null;
+function saveState() {
+  if (!saveTimer) saveTimer = setTimeout(flushState, 500);
+}
+window.addEventListener('pagehide', () => { if (saveTimer) flushState(); });
 
 // ─── Renderer ─────────────────────────────────────────────────────────────────
 
@@ -467,14 +553,23 @@ scene.add(dirLight);
 
 // ─── Viewing camera (orbit) ───────────────────────────────────────────────────
 
-const viewCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 2000);
-viewCamera.position.set(0, 90, -100);
-viewCamera.lookAt(0, 0, 0);
+const viewCamera = new THREE.PerspectiveCamera(state.viewFov, 1, 0.1, 2000);
+viewCamera.position.set(...state.viewPos);
 
 const controls = new OrbitControls(viewCamera, renderer.domElement);
-controls.target.set(0, 0, 0);
+controls.target.set(...state.viewTarget);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.update();
+
+// Copy the orbit view into state on every change; saveState() throttles writes.
+function saveView() {
+  state.viewPos = viewCamera.position.toArray();
+  state.viewTarget = controls.target.toArray();
+  state.viewFov = viewCamera.fov;
+  saveState();
+}
+controls.addEventListener('change', saveView);
 
 // ─── Field camera ────────────────────────────────────────────────────────────
 
@@ -661,7 +756,18 @@ camGroup.add(camBody);
 
 // ─── Camera helper (frustum wireframe) ───────────────────────────────────────
 
-let cameraHelper = new THREE.CameraHelper(fieldCamera);
+// Default CameraHelper colours, except the centreline ("target") is red so it
+// doesn't blend in with the white field markings.
+function makeCameraHelper(camera) {
+  const helper = new THREE.CameraHelper(camera);
+  helper.setColors(
+    new THREE.Color(0xffaa00), new THREE.Color(0xff0000), new THREE.Color(0x00aaff),
+    new THREE.Color(0xff3b30), new THREE.Color(0x333333),
+  );
+  return helper;
+}
+
+let cameraHelper = makeCameraHelper(fieldCamera);
 scene.add(cameraHelper);
 
 // ─── Frustum ground intersection ─────────────────────────────────────────────
@@ -849,7 +955,7 @@ function updateFieldCamera() {
 
   // Rebuild camera helper
   scene.remove(cameraHelper);
-  cameraHelper = new THREE.CameraHelper(fieldCamera);
+  cameraHelper = makeCameraHelper(fieldCamera);
   scene.add(cameraHelper);
 
   updateIntersection();
@@ -967,6 +1073,7 @@ document.querySelectorAll('.view-btn').forEach(btn => {
       viewCamera.updateProjectionMatrix();
     }
     controls.update();
+    saveView(); // FOV-only changes don't fire 'change'
   });
 });
 
@@ -1049,6 +1156,7 @@ function animate() {
 
 buildField(state.fieldL, state.fieldW);
 updateFieldCamera();
+flushState(); // write back the merged URL/localStorage state: address bar + share link
 animate();
 </script>
 

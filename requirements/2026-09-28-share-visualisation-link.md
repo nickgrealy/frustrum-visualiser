@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -31,11 +31,11 @@ There is no way to send someone the current setup; they would have to re-enter e
 
 ## Acceptance Criteria
 
-- [ ] Opening the generated link in a fresh browser (empty localStorage) reproduces the same field, camera, and 3D view.
-- [ ] A link with only some parameters fills the rest from localStorage/defaults.
-- [ ] Malformed parameters don't break the page.
-- [ ] Changing any control or orbiting updates the address bar without adding browser history entries.
-- [ ] The link's `href` always matches the address bar.
+- [x] Opening the generated link in a fresh browser (empty localStorage) reproduces the same field, camera, and 3D view.
+- [x] A link with only some parameters fills the rest from localStorage/defaults.
+- [x] Malformed parameters don't break the page.
+- [x] Changing any control or orbiting updates the address bar without adding browser history entries.
+- [x] The link's `href` always matches the address bar.
 
 ## Dependencies
 
@@ -43,4 +43,9 @@ Depends on REQ-006 (viewing camera state).
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- `PARAMS` maps query params to state keys. `parseNums()` rejects malformed values (wrong count, empty, non-finite); slider-backed values are clamped to their input's `min`/`max`; `vfov` is clamped to 5–120. `sport` is applied only if it exists in `sports.json`.
+- Load order per field: defaults → localStorage → URL. At startup `flushState()` writes the merged state back, so an opened link is saved and the address bar and link are populated immediately.
+- `saveState()` is throttled (500 ms, with a final save once changes stop). `flushState()` writes localStorage, then calls `history.replaceState` (in try/catch) and sets `#share-link.href = location.href`. The throttle keeps slider drags and orbiting under Safari's limit of about 100 `replaceState` calls per 30 s.
+- Commas in vector params are left unescaped for readability.
+- Rounding to 2 dp means a reloaded or shared view can differ from the original by ≤ 5 mm, a sub-pixel shift.
+- Verified in headless Chromium (18 checks, all passing): default load writes the URL; the link matches the address bar; orbiting and control changes update the URL with no new history entries; a shared link in a fresh browser gives the same URL, the same localStorage and the same frame; a partial link fills the rest from localStorage; garbage params are ignored or clamped; no page errors.

@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -23,8 +23,8 @@ The field camera's centreline (the three.js CameraHelper "target" line from the 
 
 ## Acceptance Criteria
 
-- [ ] The centreline is drawn in red on every sport's surface.
-- [ ] It stays red after moving the camera.
+- [x] The centreline is drawn in red on every sport's surface.
+- [x] It stays red after moving the camera.
 
 ## Dependencies
 
@@ -32,4 +32,5 @@ None.
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- `makeCameraHelper()` wraps `new THREE.CameraHelper()` and calls `setColors()` with three.js 0.160's defaults (frustum `#ffaa00`, cone `#ff0000`, up `#00aaff`, cross `#333333`), except target = `#ff3b30`. It's used at startup and on each rebuild in `updateFieldCamera()`.
+- Verified visually in an orbited view: the centreline is red against the pitch and the white markings.
