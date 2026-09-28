@@ -20,4 +20,4 @@
 | REQ-016 | Add water polo                                  | Medium   | Completed   | 2026-09-28 | [2026-09-28-water-polo.md](2026-09-28-water-polo.md)                                     |
 | REQ-017 | Add swimming pool                               | Medium   | Completed   | 2026-09-28 | [2026-09-28-swimming-pool.md](2026-09-28-swimming-pool.md)                               |
 | REQ-018 | README screenshot (swimming pool)               | Low      | Completed   | 2026-09-28 | [2026-09-28-readme-screenshot.md](2026-09-28-readme-screenshot.md)                       |
-| REQ-019 | README "Try it right now!" link                 | Low      | In Progress | 2026-09-28 | [2026-09-28-readme-try-it-link.md](2026-09-28-readme-try-it-link.md)                     |
+| REQ-019 | README "Try it right now!" link                 | Low      | Completed   | 2026-09-28 | [2026-09-28-readme-try-it-link.md](2026-09-28-readme-try-it-link.md)                     |

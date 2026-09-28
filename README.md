@@ -2,6 +2,8 @@
 
 Visualise what a fixed camera can see of a sports field. Position and aim a camera, set its field of view, and see its viewing frustum and ground coverage in 3D, with the covered area and nearest/farthest distances.
 
+[Try it right now!](https://frustrum-visualiser.vercel.app/?sport=swimming-pool&L=50&W=25&cam=24,4.5,-16.5&rot=-29,-45,0&fov=102,67&view=44.36,12.5,9.14&look=-10.35,-5.43,-15.15&vfov=50)
+
 ![Swimming pool with camera coverage in the 3D view](docs/images/swimming-pool.png)
 
 ## Run it

@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Low
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -23,7 +23,7 @@ The README doesn't point to the hosted app, so readers can't try it without runn
 
 ## Acceptance Criteria
 
-- [ ] README shows "Try it right now!" between the description and the image, linking to the URL above.
+- [x] README shows "Try it right now!" between the description and the image, linking to the URL above.
 
 ## Dependencies
 
@@ -31,4 +31,4 @@ REQ-008 (share link parameters), REQ-014 (README), REQ-018 (screenshot position)
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- Link added on its own line directly above the screenshot, with the URL verbatim.
