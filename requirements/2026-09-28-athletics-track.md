@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: Planned
+**Status**: In Progress
 
 ## Problem Statement
 
@@ -33,9 +33,9 @@ Athletics stadiums are among the most commonly filmed venues, but there's no ath
 
 Uses the REQ-004 schema and the REQ-012 `roundrect` surface.
 
-## Open Questions (design)
+## Design Decisions (user, 2026-09-28)
 
-- Include field-event areas (jumps pits, throwing circles)? Proposed: not in this change.
+- Track only; no field-event areas.
 
 ## Implementation Notes
 

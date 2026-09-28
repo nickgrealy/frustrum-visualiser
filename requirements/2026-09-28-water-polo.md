@@ -10,7 +10,10 @@ There's no aquatic venue preset; water polo was requested.
 
 ## Functional Requirements
 
-- Add a "Water polo" sport. Design to be confirmed with the user: a water polo field of play differs from a lane-roped swimming pool (see Open Questions).
+- Add a "Water polo" sport: a 33 × 25 m pool containing the 30 × 20 m field of play (men's).
+- Field of play outlined by floating perimeter ropes; no lane ropes.
+- Side markers along both sides: goal lines (white), 2 m (red), 5 m (yellow), halfway (white).
+- Floating goals: 3 m wide, 0.9 m above the water.
 
 ## User Experience Requirements
 
@@ -22,16 +25,17 @@ There's no aquatic venue preset; water polo was requested.
 
 ## Acceptance Criteria
 
-- [ ] Water polo renders per the approved design, with no page errors.
+- [ ] Pool with 30 × 20 m field of play, coloured side markers and floating goals; no page errors.
+- [ ] Resizing keeps markers anchored to the goal lines.
 
 ## Dependencies
 
 Uses the REQ-004 schema.
 
-## Open Questions (design)
+## Design Decisions (user, 2026-09-28)
 
-1. Water polo field of play (30 × 20 m, perimeter ropes, coloured side markers, floating goals, no lane ropes) vs a generic 8-lane pool?
-2. Also add a separate generic "Swimming pool" (50 m, 8 lanes)?
+1. Water polo field of play (not a lane-roped pool).
+2. A separate generic swimming pool is added as REQ-017.
 
 ## Implementation Notes
 

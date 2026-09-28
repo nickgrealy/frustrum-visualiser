@@ -16,5 +16,6 @@
 | REQ-012 | Add more sports (9 new, incl. baseball, TT)     | Medium   | Completed   | 2026-09-28 | [2026-09-28-more-sports.md](2026-09-28-more-sports.md)                                   |
 | REQ-013 | Rename to "Gaelic football"                     | Low      | Completed   | 2026-09-28 | [2026-09-28-rename-gaelic-football.md](2026-09-28-rename-gaelic-football.md)             |
 | REQ-014 | Simple README                                   | Low      | Completed   | 2026-09-28 | [2026-09-28-readme.md](2026-09-28-readme.md)                                             |
-| REQ-015 | Add athletics track                             | Medium   | Planned     | 2026-09-28 | [2026-09-28-athletics-track.md](2026-09-28-athletics-track.md)                           |
+| REQ-015 | Add athletics track                             | Medium   | In Progress | 2026-09-28 | [2026-09-28-athletics-track.md](2026-09-28-athletics-track.md)                           |
 | REQ-016 | Add water polo                                  | Medium   | Planned     | 2026-09-28 | [2026-09-28-water-polo.md](2026-09-28-water-polo.md)                                     |
+| REQ-017 | Add swimming pool                               | Medium   | Planned     | 2026-09-28 | [2026-09-28-swimming-pool.md](2026-09-28-swimming-pool.md)                               |
