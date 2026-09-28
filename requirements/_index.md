@@ -19,3 +19,4 @@
 | REQ-015 | Add athletics track                             | Medium   | Completed   | 2026-09-28 | [2026-09-28-athletics-track.md](2026-09-28-athletics-track.md)                           |
 | REQ-016 | Add water polo                                  | Medium   | Completed   | 2026-09-28 | [2026-09-28-water-polo.md](2026-09-28-water-polo.md)                                     |
 | REQ-017 | Add swimming pool                               | Medium   | Completed   | 2026-09-28 | [2026-09-28-swimming-pool.md](2026-09-28-swimming-pool.md)                               |
+| REQ-018 | README screenshot (swimming pool)               | Low      | Planned     | 2026-09-28 | [2026-09-28-readme-screenshot.md](2026-09-28-readme-screenshot.md)                       |
