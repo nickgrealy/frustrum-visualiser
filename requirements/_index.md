@@ -6,4 +6,4 @@
 | REQ-002 | Sport field size presets                        | Medium   | Completed   | 2026-09-28 | [2026-09-28-sport-field-size-presets.md](2026-09-28-sport-field-size-presets.md)         |
 | REQ-003 | Cricket preset and wider pitch size range       | Medium   | Completed   | 2026-09-28 | [2026-09-28-cricket-preset-wider-range.md](2026-09-28-cricket-preset-wider-range.md)     |
 | REQ-004 | Per-sport field markings defined in sports.json | High     | Completed   | 2026-09-28 | [2026-09-28-sport-markings-sports-json.md](2026-09-28-sport-markings-sports-json.md)     |
-| REQ-005 | Sidebar section and control icons             | Medium   | In Progress | 2026-09-28 | [2026-09-28-sidebar-control-icons.md](2026-09-28-sidebar-control-icons.md)               |
+| REQ-005 | Sidebar section and control icons             | Medium   | Completed   | 2026-09-28 | [2026-09-28-sidebar-control-icons.md](2026-09-28-sidebar-control-icons.md)               |

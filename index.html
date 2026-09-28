@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soccer Frustum Visualizer</title>
+  <title>Frustum Visualizer</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -40,6 +40,19 @@
       margin-bottom: 20px;
     }
 
+    /* Inline SVG icons: decorative, inherit the label colour. */
+    .ico {
+      width: 14px; height: 14px; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .ico .f { opacity: 0.35; } /* de-emphasised parts, e.g. inactive axes */
+    #sidebar h1 { display: flex; align-items: center; gap: 8px; }
+    #sidebar h1 .ico { width: 16px; height: 16px; }
+    .section-title { display: flex; align-items: center; gap: 6px; }
+    #stats .stat { display: flex; align-items: center; gap: 6px; }
+    #stats .ico { color: #58a6ff; }
+
     .section-title {
       font-size: 11px;
       font-weight: 600;
@@ -57,7 +70,7 @@
 
     .ctrl-label {
       display: flex;
-      justify-content: space-between;
+      gap: 6px;
       align-items: center;
       font-size: 11px;
       color: #8b949e;
@@ -226,28 +239,28 @@
 <body>
 
 <div id="sidebar">
-  <h1>⚽ Frustum Visualizer</h1>
+  <h1><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10.5l6-3.5v10l-6-3.5"/></svg>Frustum Visualizer</h1>
 
   <!-- ── Camera Position ── -->
   <div class="section">
-    <div class="section-title">Camera Position</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-11a7 7 0 0 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Camera Position</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">X</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15V3M9 15l-6 6"/><path d="M9 15h12M18 12l3 3-3 3"/></svg>X</div>
       <div class="ctrl-row">
         <input type="range" id="camX" min="-60" max="60" step="0.5" value="0">
         <input type="number" id="camX-num" step="0.5" value="0">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Y (height)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15h12M9 15l-6 6"/><path d="M9 15V3M6 6l3-3 3 3"/></svg>Y (height)</div>
       <div class="ctrl-row">
         <input type="range" id="camY" min="0.5" max="30" step="0.5" value="8">
         <input type="number" id="camY-num" step="0.5" value="8">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Z (along sideline)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15h12M9 15V3"/><path d="M9 15l-6 6M3 16.5V21h4.5"/></svg>Z (along sideline)</div>
       <div class="ctrl-row">
         <input type="range" id="camZ" min="-80" max="80" step="0.5" value="-42">
         <input type="number" id="camZ-num" step="0.5" value="-42">
@@ -257,24 +270,24 @@
 
   <!-- ── Camera Orientation ── -->
   <div class="section">
-    <div class="section-title">Camera Orientation</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Camera Orientation</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Pitch (up/down)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="8" height="6" rx="1"/><path d="M11 12h3"/><path d="M17 4.5a9 9 0 0 1 0 15"/><path d="M14.5 4l2.5.5-.6 2.5M14.5 20l2.5-.5-.6-2.5"/></svg>Pitch (up/down)</div>
       <div class="ctrl-row">
         <input type="range" id="pitch" min="-90" max="90" step="1" value="-15">
         <input type="number" id="pitch-num" step="1" value="-15">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Yaw (left/right)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M12 3v18"/><rect x="9" y="7" width="6" height="4" rx="1"/><path d="M5 14.5c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5"/><path d="M16.5 19.5l2.5-1.5-1.4-2.4"/></svg>Yaw (left/right)</div>
       <div class="ctrl-row">
         <input type="range" id="yaw" min="-180" max="180" step="1" value="0">
         <input type="number" id="yaw-num" step="1" value="0">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Roll</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><path d="M19.5 9.5A8 8 0 1 1 15 4.6"/><path d="M15.5 2l.2 3-3 .7"/></svg>Roll</div>
       <div class="ctrl-row">
         <input type="range" id="roll" min="-45" max="45" step="1" value="0">
         <input type="number" id="roll-num" step="1" value="0">
@@ -284,17 +297,17 @@
 
   <!-- ── Field of View ── -->
   <div class="section">
-    <div class="section-title">Field of View</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="9" width="5" height="6" rx="1"/><path d="M7 12l14-8M7 12l14 8"/><path d="M17 6.3a12 12 0 0 1 0 11.4"/></svg>Field of View</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Horizontal FOV</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21L4 8M12 21l8-13"/><path d="M5 3.5h14M7.5 1.5l-2.5 2 2.5 2M16.5 1.5l2.5 2-2.5 2"/></svg>Horizontal FOV</div>
       <div class="ctrl-row">
         <input type="range" id="hfov" min="10" max="170" step="1" value="90">
         <input type="number" id="hfov-num" step="1" value="90">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Vertical FOV</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l13-8M3 12l13 8"/><path d="M20.5 5v14M18.5 7.5l2-2.5 2 2.5M18.5 16.5l2 2.5 2-2.5"/></svg>Vertical FOV</div>
       <div class="ctrl-row">
         <input type="range" id="vfov" min="5" max="160" step="1" value="55">
         <input type="number" id="vfov-num" step="1" value="55">
@@ -304,34 +317,34 @@
 
   <!-- ── Field Dimensions ── -->
   <div class="section">
-    <div class="section-title">Pitch Dimensions</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"/><path d="M14.5 12.5l2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></svg>Pitch Dimensions</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Length</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="18" height="10" rx="1"/><path d="M3 5h18M5.5 3L3 5l2.5 2M18.5 3L21 5l-2.5 2"/></svg>Length</div>
       <div class="ctrl-row">
         <input type="range" id="fieldL" min="13" max="180" step="0.1" value="105">
         <input type="number" id="fieldL-num" min="13" max="180" step="0.1" value="105">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Width</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="13" rx="1"/><path d="M20 6v13M18 8.5l2-2.5 2 2.5M18 16.5l2 2.5 2-2.5"/></svg>Width</div>
       <div class="ctrl-row">
         <input type="range" id="fieldW" min="6" max="150" step="0.1" value="68">
         <input type="number" id="fieldW-num" min="6" max="150" step="0.1" value="68">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Sport</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.8l4 2.9-1.5 4.7h-5L8 10.7z"/><path d="M12 7.8V3M16 10.7l4.3-1.4M14.5 15.4l2.6 3.9M9.5 15.4l-2.6 3.9M8 10.7L3.7 9.3"/></svg>Sport</div>
       <div class="field-presets" id="field-presets"></div>
     </div>
   </div>
 
   <!-- ── Viewing Camera ── -->
   <div class="section">
-    <div class="section-title">Viewing Camera (Scene)</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Viewing Camera (Scene)</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Preset</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8.5 4.8v9.4L12 21.5l-8.5-4.8V7.3z"/><path d="M12 12l8.5-4.7M12 12L3.5 7.3M12 12v9.5"/></svg>Preset</div>
       <div style="display:flex;gap:6px;margin-top:4px;">
         <button class="view-btn" data-view="top">Top</button>
         <button class="view-btn" data-view="side">Side</button>
@@ -348,9 +361,9 @@
 
 <div id="viewport">
   <div id="stats">
-    <b>Coverage area:</b> <span id="stat-area">—</span><br>
-    <b>Farthest point:</b> <span id="stat-far">—</span><br>
-    <b>Nearest point:</b> <span id="stat-near">—</span>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L9 6h6l4 13z" fill="currentColor" fill-opacity=".2"/></svg><b>Coverage area:</b> <span id="stat-area">—</span></div>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="2"/><path d="M6 12h14M20 7v10"/></svg><b>Farthest point:</b> <span id="stat-far">—</span></div>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="2"/><path d="M6 12h5M11 7v10"/></svg><b>Nearest point:</b> <span id="stat-near">—</span></div>
   </div>
   <div id="inset-label">Camera POV</div>
   <div id="inset-border"></div>

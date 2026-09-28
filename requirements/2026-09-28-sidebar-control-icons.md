@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -30,10 +30,10 @@ The sidebar is text-only (e.g. "Pitch", "Yaw", "Roll", "Horizontal FOV"), so it 
 ## Acceptance Criteria
 
 - [x] User has approved the icon set.
-- [ ] Heading shows a camera icon instead of ⚽.
-- [ ] Every section title, control label and stat line listed above has its icon.
-- [ ] Icons align vertically with the label text and don't shift the slider layout.
-- [ ] No new network requests.
+- [x] Heading shows a camera icon instead of ⚽.
+- [x] Every section title, control label and stat line listed above has its icon.
+- [x] Icons align vertically with the label text and don't shift the slider layout.
+- [x] No new network requests.
 
 ## Dependencies
 
@@ -43,4 +43,9 @@ None. Touches only the sidebar/stat markup and CSS in `index.html`.
 
 Approved design: 20 inline SVG icons (pin, compass, camera+cone, ruler, eye; axis gizmo X/Y/Z; pitch/yaw/roll rotation arrows; H/V FOV wedge with ↔/↕; length/width field with dimension arrow; ball; cube; footprint trapezoid; far/near distance marks).
 
-_Build notes to be completed after implementation._
+Build notes:
+- 21 inline `<svg class="ico">` elements in `index.html` (20 approved + camera in the heading). Shared `.ico` CSS: 14 px (16 px in the heading), `stroke: currentColor`; `.ico .f` fades the inactive axes on X/Y/Z.
+- `.ctrl-label` changed from `justify-content: space-between` to `gap: 6px`; otherwise the label text was pushed to the right edge once an icon was added. Nothing used the space-between layout (the `.val` readout style is unused).
+- Section titles and the heading became flex rows. The stats overlay's `<br>` lines became `.stat` flex rows, with icons in the same blue as the stat labels.
+- Page `<title>` changed from "Soccer Frustum Visualizer" to "Frustum Visualizer".
+- Verified in headless Chromium: all 21 icons render, slider position and width are unchanged from before (x=16, w=207), no page errors, and no requests beyond `index.html`, `sports.json` and three.js.
