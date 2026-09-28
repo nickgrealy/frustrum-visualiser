@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -25,8 +25,8 @@ There's no aquatic venue preset; water polo was requested.
 
 ## Acceptance Criteria
 
-- [ ] Pool with 30 × 20 m field of play, coloured side markers and floating goals; no page errors.
-- [ ] Resizing keeps markers anchored to the goal lines.
+- [x] Pool with 30 × 20 m field of play, coloured side markers and floating goals; no page errors.
+- [x] Resizing keeps markers anchored to the goal lines.
 
 ## Dependencies
 
@@ -39,4 +39,8 @@ Uses the REQ-004 schema.
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- Committed in the "Add Water polo (REQ-016)" commit on `main`. `sports.json` entry only, with no renderer changes.
+- Pool 33 × 25 m (1.5 m behind each goal line, 2.5 m beside the field of play); field of play 30 × 20 m drawn as a dashed rope outline (edge-anchored).
+- Side markers are 1.2 m ticks across the side ropes at the goal lines (white), 2 m (red `#e03131`), 5 m (yellow `#f2c94c`) and halfway (white), edge-anchored so they stay measured from the goal lines.
+- Goals: 3 m wide, 0.9 m above the water, 0.3 m deep net frame.
+- Verified in headless Chromium: top view at 33 × 25 and 25 × 20, and a close 3D view of goals and markers; no page errors.

@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: Planned
+**Status**: In Progress
 
 ## Problem Statement
 
@@ -10,7 +10,7 @@ Swimming pools are commonly filmed venues. Water polo (REQ-016) doesn't show a l
 
 ## Functional Requirements
 
-- Add a "Swimming pool" sport: a 50 × 25 m long-course pool with 8 lanes of 2.5 m (plus 1.25 m outer buffers).
+- Add a "Swimming pool" sport: a 50 × 25 m long-course pool with 8 racing lanes of 2.5 m plus a 2.5 m outer lane on each side (10 × 2.5 m = 25 m, as in Olympic pools).
 - Lane ropes, dark lane stripes on the pool floor with T-marks near each wall, 15 m marks, and backstroke flags 5 m from each end (1.8 m high).
 
 ## User Experience Requirements
