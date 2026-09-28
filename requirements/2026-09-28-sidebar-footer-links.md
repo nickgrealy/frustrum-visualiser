@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Low
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -16,7 +16,7 @@ The "Share visualisation" link sits between the controls and the orbit hint, and
 ## User Experience Requirements
 
 - Both links use the same style (blue, icon + text, underline on hover); "Raise a bug" has a bug icon in the REQ-005 style.
-- Icon to be previewed and approved before implementation.
+- Icon previewed and approved by the user on 2026-09-28.
 
 ## Technical Requirements
 
@@ -25,9 +25,9 @@ The "Share visualisation" link sits between the controls and the orbit hint, and
 
 ## Acceptance Criteria
 
-- [ ] Order at the bottom of the sidebar: orbit hint, Share visualisation, Raise a bug.
-- [ ] "Raise a bug" opens the GitHub issues page in a new tab.
-- [ ] Share link still matches the address bar.
+- [x] Order at the bottom of the sidebar: orbit hint, Share visualisation, Raise a bug.
+- [x] "Raise a bug" opens the GitHub issues page in a new tab.
+- [x] Share link still matches the address bar.
 
 ## Dependencies
 
@@ -35,4 +35,6 @@ Amends the placement decided in REQ-008.
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- Both links sit in a `.sidebar-links` flex column (6 px gap) below the orbit hint. The CSS class `.share-link` was renamed to `.sidebar-link` because it now styles both links; the `#share-link` id used by the REQ-008 code is unchanged.
+- The bug icon is a new inline SVG (body, head, legs, antennae) in the REQ-005 `.ico` style.
+- Verified in headless Chromium: link order below the hint; the bug link's href, `target="_blank"` and `rel="noopener noreferrer"`; clicking it opens a new tab while the original stays put; the share link still matches the address bar after a change; no page errors.

@@ -10,4 +10,4 @@
 | REQ-006 | Persist the viewing camera in localStorage      | Medium   | Completed   | 2026-09-28 | [2026-09-28-persist-viewing-camera.md](2026-09-28-persist-viewing-camera.md)             |
 | REQ-007 | Field camera centreline in a strong colour      | Medium   | Completed   | 2026-09-28 | [2026-09-28-camera-centreline-colour.md](2026-09-28-camera-centreline-colour.md)         |
 | REQ-008 | "Share visualisation" link                      | Medium   | Completed   | 2026-09-28 | [2026-09-28-share-visualisation-link.md](2026-09-28-share-visualisation-link.md)         |
-| REQ-009 | Sidebar footer links: Share + Raise a bug       | Low      | In Progress | 2026-09-28 | [2026-09-28-sidebar-footer-links.md](2026-09-28-sidebar-footer-links.md)                 |
+| REQ-009 | Sidebar footer links: Share + Raise a bug       | Low      | Completed   | 2026-09-28 | [2026-09-28-sidebar-footer-links.md](2026-09-28-sidebar-footer-links.md)                 |
