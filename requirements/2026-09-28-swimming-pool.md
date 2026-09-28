@@ -36,3 +36,4 @@ Uses the REQ-004 schema. Requested alongside REQ-016.
 - Layout corrected from the first draft ("1.25 m buffers" didn't sum to 25 m): 10 × 2.5 m lanes, 8 racing lanes plus an empty outer lane each side.
 - 9 dashed lane ropes (stretch-anchored so lanes divide the width evenly); 0.25 m dark lane stripes for the 8 racing lanes ending 2 m from each wall, with 1 m T-bars; red dashed 15 m lines; yellow backstroke-flag lines 1.8 m high, 5 m from each wall.
 - Verified in headless Chromium: top view at 50 × 25 and 25 × 15, and a close 3D view; no page errors.
+- README feature list updated from "20 sports" to "23 sports and venues" (athletics track, water polo, swimming pool).
