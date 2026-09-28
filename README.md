@@ -2,6 +2,8 @@
 
 Visualise what a fixed camera can see of a sports field. Position and aim a camera, set its field of view, and see its viewing frustum and ground coverage in 3D, with the covered area and nearest/farthest distances.
 
+![Swimming pool with camera coverage in the 3D view](docs/images/swimming-pool.png)
+
 ## Run it
 
 It's a static site with no build step, but it must be served over HTTP because it loads `sports.json`:

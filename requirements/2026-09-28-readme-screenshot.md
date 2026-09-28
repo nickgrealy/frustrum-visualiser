@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Low
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -23,8 +23,8 @@ The README (REQ-014) is text-only; a screenshot shows at a glance what the tool 
 
 ## Acceptance Criteria
 
-- [ ] Image file committed at the path above.
-- [ ] README shows the image below the intro (relative link resolves).
+- [x] Image file committed at the path above.
+- [x] README shows the image below the intro (relative link resolves).
 
 ## Dependencies
 
@@ -32,4 +32,5 @@ REQ-014 (README), REQ-017 (screenshot source).
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- `docs/images/swimming-pool.png` (1100 × 900, ~60 KB) is the REQ-017 close-up: lanes, T-bars, backstroke flags and the coverage stats overlay.
+- README embeds it below the intro paragraph as `![Swimming pool with camera coverage in the 3D view](docs/images/swimming-pool.png)`; the relative path resolves from the repo root.
