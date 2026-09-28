@@ -649,7 +649,8 @@ const MIRRORS = { x: [[1, 1], [-1, 1]], z: [[1, 1], [1, -1]], xz: [[1, 1], [-1, 
 // goes through the anchor mapping, plus an offset (ox, oy, oz) scaled by s.
 function markingPaths(m) {
   const anchor = m.anchor || ['centre', 'centre'];
-  const v = (bx, bz, a, ox = 0, oy = 0, oz = 0) => ({ bx, bz, a, ox, oy, oz });
+  // Optional m.y raises a flat marking (e.g. a table top) off the ground.
+  const v = (bx, bz, a, ox = 0, oy = m.y || 0, oz = 0) => ({ bx, bz, a, ox, oy, oz });
   switch (m.type) {
     case 'polyline':
       return [m.points.map(([x, z], i) => v(x, z, m.anchors?.[i] || anchor))];
@@ -744,14 +745,14 @@ function buildField(length, width) {
   // +90° about X maps shape (x, y) onto world (x, z) without mirroring z.
   // Flat fills share the surface height; polygonOffset (not a y gap) layers
   // them, so they don't z-fight with each other or the coverage overlay.
-  const addFlat = (pts, color, layer) => {
+  const addFlat = (pts, color, layer, y = 0) => {
     const mat = new THREE.MeshLambertMaterial({
       color, side: THREE.DoubleSide,
       polygonOffset: true, polygonOffsetFactor: -layer, polygonOffsetUnits: -layer,
     });
     const mesh = new THREE.Mesh(flatShape(pts), mat);
     mesh.rotation.x = Math.PI / 2;
-    mesh.position.y = 0.01;
+    mesh.position.y = y ? y - 0.005 : 0.01; // raised fills sit just under their lines
     fieldGroup.add(mesh);
   };
   addFlat(outline, sport.surface.color, 1);
@@ -784,7 +785,7 @@ function buildField(length, width) {
           const [x, z] = map(fx * bx, fz * bz, a);
           return new THREE.Vector3(x + fx * ox * s, oy * s, z + fz * oz * s);
         });
-        if (m.fill) addFlat(pts, m.fill, fillLayer++);
+        if (m.fill) addFlat(pts, m.fill, fillLayer++, is3d ? (m.y || 0) * s : 0);
         if (m.line === false) continue;
         if (is3d) {
           addLine(pts, { color: m.color, dashed: m.dashed });
