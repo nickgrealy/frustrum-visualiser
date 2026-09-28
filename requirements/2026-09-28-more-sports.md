@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Medium
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -40,13 +40,13 @@ Popular regional sports are missing: ice hockey (Canada, US, Northern Europe), A
 
 ## Acceptance Criteria
 
-- [ ] Every new sport renders its markings at its standard size, with no page errors.
-- [ ] The ice rink has rounded corners; coverage stats clip to the rounded outline.
-- [ ] Ice hockey lines are visible on the ice surface.
-- [ ] Baseball renders a fan-shaped field; coverage stats clip to the fan.
-- [ ] Table tennis shows a raised table (0.76 m) with net on a 14 × 7 m floor.
-- [ ] "Rugby" is shown as "Rugby union"; `?sport=rugby` links still work.
-- [ ] Resizing a new sport keeps markings anchored and nothing spills outside the field.
+- [x] Every new sport renders its markings at its standard size, with no page errors.
+- [x] The ice rink has rounded corners; coverage stats clip to the rounded outline.
+- [x] Ice hockey lines are visible on the ice surface.
+- [x] Baseball renders a fan-shaped field; coverage stats clip to the fan.
+- [x] Table tennis shows a raised table (0.76 m) with net on a 14 × 7 m floor.
+- [x] "Rugby" is shown as "Rugby union"; `?sport=rugby` links still work.
+- [x] Resizing a new sport keeps markings anchored and nothing spills outside the field.
 
 ## Dependencies
 
@@ -67,4 +67,26 @@ Builds on REQ-004 (`sports.json` schema) and REQ-011 (alphabetical order).
 
 ## Implementation Notes
 
-_To be completed after implementation._
+One commit per sport, in this order: Rugby union rename (`588d726`), Rugby league (`d4e148a`), Hurling / Gaelic football (`90b8a79`), American football (`ea8bcf9`), Aussie rules (`aea3a42`), Handball (`f8db7dd`), Padel (`574f34c`), Ice hockey (`8154a5a`), Baseball (`906c0fb`), Table tennis (`5563624`).
+
+Renderer additions (each committed with the sport that needed it):
+- **Ground-marking clipping** (Aussie rules): non-3D lines are clipped to the surface outline (Cyrus–Beck against the convex outline; boundary points kept). Anchored markings that outgrow a resized field, such as AFL 50 m arcs or the handball 9 m line, stop at the boundary instead of spilling over.
+- **`roundrect` surface + `lineColor`** (Ice hockey): the corner radius scales with the markings (`s`) and is capped to fit. `lineColor` is the default for uncoloured lines, and `outline` markings accept `color`.
+- **`polygon` surface** (Baseball): a convex point list in standard-size metres, stretched with L/W. Coverage and marking clipping use it unchanged, since both need a convex outline.
+- **Ordered fill layers** (Baseball): each fill gets a higher polygonOffset than the previous one, so later fills draw on top (dirt → grass → mound → bases).
+- **Raised markings** (Table tennis): `y` on `rect`/`polyline` raises its lines and fill; raised fills sit 5 mm under their lines.
+
+Dimensions used (from the governing bodies' published standards as I know them; not re-checked against live documents in this session, because the sandbox has no web access):
+- Ice hockey (NHL): 200 × 85 ft, 28 ft corners; goal lines 11 ft from boards; blue lines 25 ft from centre; circles 15 ft radius; end dots 20 ft from goal line, 22 ft off centre; crease 6 ft; goal 6 × 4 ft.
+- American football (NFL): 120 × 53⅓ yd; inbounds lines 70 ft 9 in from sidelines; crossbar 10 ft; uprights 18 ft 6 in apart, 35 ft above crossbar.
+- Aussie rules (AFL): no fixed ground size (165 × 135 m typical); 50 m centre square; 3 m / 10 m centre circles; 9 × 6.4 m goal square; 50 m arcs from centre of goal line; posts 6.4 m apart.
+- Rugby league: 100 × 68 m in-field; lines every 10 m; posts 5.5 m apart, crossbar 3 m.
+- Hurling / Gaelic football (GAA): 145 × 88 m within the 130–145 × 80–90 m range; 13/20/45/65 m lines; 14 × 4.5 m and 19 × 13 m rectangles; 13 m arc; posts 6.5 m apart, crossbar 2.5 m.
+- Handball (IHF): 40 × 20 m; 6 m goal area; 9 m free-throw line; 7 m and 4 m marks; goal 3 × 2 m.
+- Padel (FIP): 20 × 10 m; service lines 6.95 m from net; net 0.88 m centre / 0.92 m posts; walls simplified (4 m back wall, stepped side glass, 3 m mesh).
+- Baseball (MLB): 90 ft bases; rubber 60 ft 6 in from home; 95 ft infield arc; mound 18 ft diameter; 330 ft foul poles and 400 ft to centre (typical, since outfield dimensions vary by park); 60 ft backstop.
+- Table tennis (ITTF): table 2.74 × 1.525 × 0.76 m; net 15.25 cm high, extending 15.25 cm past each side; 14 × 7 m playing area.
+
+Verification: a final regression run loaded all 20 sports with no page errors. Each new sport was also screenshotted in headless Chromium at its standard size (top view) and, where relevant, resized and close-up 3D; no page errors. Existing sports re-checked after each renderer change (football, tennis, cricket, basketball).
+
+Simplifications / not included: yard numbers and per-yard hash ticks (hash marks drawn as dashed lines); rugby in-goal areas; ice-hockey boards, trapezoids and hash marks; baseball warning track and per-park outfield shapes; padel wall panels drawn as frames only.

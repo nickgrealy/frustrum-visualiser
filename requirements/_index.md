@@ -13,4 +13,4 @@
 | REQ-009 | Sidebar footer links: Share + Raise a bug       | Low      | Completed   | 2026-09-28 | [2026-09-28-sidebar-footer-links.md](2026-09-28-sidebar-footer-links.md)                 |
 | REQ-010 | Widen camera Roll range to ±90°                 | Low      | Completed   | 2026-09-28 | [2026-09-28-roll-range-90.md](2026-09-28-roll-range-90.md)                               |
 | REQ-011 | Show sports alphabetically                      | Low      | Completed   | 2026-09-28 | [2026-09-28-sports-alphabetical.md](2026-09-28-sports-alphabetical.md)                   |
-| REQ-012 | Add more sports (9 new, incl. baseball, TT)     | Medium   | In Progress | 2026-09-28 | [2026-09-28-more-sports.md](2026-09-28-more-sports.md)                                   |
+| REQ-012 | Add more sports (9 new, incl. baseball, TT)     | Medium   | Completed   | 2026-09-28 | [2026-09-28-more-sports.md](2026-09-28-more-sports.md)                                   |
