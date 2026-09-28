@@ -2,7 +2,7 @@
 
 **Date Added**: 2026-09-28
 **Priority**: Low
-**Status**: In Progress
+**Status**: Completed
 
 ## Problem Statement
 
@@ -24,9 +24,9 @@ The sport buttons appear in `sports.json` order (Football, Futsal, Rugby, Cricke
 
 ## Acceptance Criteria
 
-- [ ] Buttons render in the alphabetical order above.
-- [ ] A fresh load still defaults to Football.
-- [ ] The active sport is still highlighted, and clicking a button still selects it.
+- [x] Buttons render in the alphabetical order above.
+- [x] A fresh load still defaults to Football.
+- [x] The active sport is still highlighted, and clicking a button still selects it.
 
 ## Dependencies
 
@@ -34,4 +34,5 @@ Builds on REQ-004 (buttons generated from `sports.json`).
 
 ## Implementation Notes
 
-_To be completed after implementation._
+- The button loop iterates over a sorted copy, `[...SPORTS].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))`. `SPORTS` itself keeps `sports.json` order, so `SPORTS[0]` (Football) is still the default.
+- Verified in headless Chromium: button order is badminton … volleyball (alphabetical); a fresh load defaults to Football and highlights it; clicking Hockey selects it (URL `sport=hockey`, length 91.4); no page errors, including with `?sport=nope`.

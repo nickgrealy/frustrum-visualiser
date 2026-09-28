@@ -1035,7 +1035,8 @@ if (sportsError) {
     Serve this folder over HTTP (e.g. <code>npx serve</code>) instead of opening the file directly.</div>`;
 }
 
-SPORTS.forEach(sport => {
+// Buttons are alphabetical; SPORTS keeps sports.json order so SPORTS[0] stays the default.
+[...SPORTS].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })).forEach(sport => {
   const btn = document.createElement('button');
   btn.className = 'field-btn';
   btn.dataset.sport = sport.id;
