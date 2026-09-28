@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soccer Frustum Visualizer</title>
+  <title>Frustum Visualizer</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -40,6 +40,25 @@
       margin-bottom: 20px;
     }
 
+    /* Inline SVG icons: decorative, inherit the label colour. */
+    .ico {
+      width: 14px; height: 14px; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .ico .f { opacity: 0.35; } /* de-emphasised parts, e.g. inactive axes */
+    #sidebar h1 { display: flex; align-items: center; gap: 8px; }
+    #sidebar h1 .ico { width: 16px; height: 16px; }
+    .section-title { display: flex; align-items: center; gap: 6px; }
+    #stats .stat { display: flex; align-items: center; gap: 6px; }
+    #stats .ico { color: #58a6ff; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #58a6ff; text-decoration: none;
+    }
+    .sidebar-link:hover { text-decoration: underline; }
+    .sidebar-links { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+
     .section-title {
       font-size: 11px;
       font-weight: 600;
@@ -57,7 +76,7 @@
 
     .ctrl-label {
       display: flex;
-      justify-content: space-between;
+      gap: 6px;
       align-items: center;
       font-size: 11px;
       color: #8b949e;
@@ -206,33 +225,48 @@
     }
 
     .divider { height: 1px; background: #21262d; margin: 14px 0; }
+    .field-presets {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px;
+    }
+    .field-btn {
+      padding: 4px 6px; font-size: 10px; font-family: monospace; text-align: left;
+      background: #21262d; border: 1px solid #30363d; color: #8b949e;
+      border-radius: 3px; cursor: pointer; line-height: 1.3;
+    }
+    .field-btn:hover { background: #2d333b; }
+    .field-btn.active { border-color: #58a6ff; color: #c9d1d9; }
+    .field-btn small { display: block; color: #6e7681; }
+    .field-error {
+      grid-column: 1 / -1; font-size: 10px; line-height: 1.5; color: #f0883e;
+      border: 1px solid #5a3a1e; border-radius: 3px; padding: 6px;
+    }
   </style>
 </head>
 <body>
 
 <div id="sidebar">
-  <h1>⚽ Frustum Visualizer</h1>
+  <h1><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10.5l6-3.5v10l-6-3.5"/></svg>Frustum Visualizer</h1>
 
   <!-- ── Camera Position ── -->
   <div class="section">
-    <div class="section-title">Camera Position</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-11a7 7 0 0 0-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Camera Position</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">X</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15V3M9 15l-6 6"/><path d="M9 15h12M18 12l3 3-3 3"/></svg>X</div>
       <div class="ctrl-row">
         <input type="range" id="camX" min="-60" max="60" step="0.5" value="0">
         <input type="number" id="camX-num" step="0.5" value="0">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Y (height)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15h12M9 15l-6 6"/><path d="M9 15V3M6 6l3-3 3 3"/></svg>Y (height)</div>
       <div class="ctrl-row">
         <input type="range" id="camY" min="0.5" max="30" step="0.5" value="8">
         <input type="number" id="camY-num" step="0.5" value="8">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Z (along sideline)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M9 15h12M9 15V3"/><path d="M9 15l-6 6M3 16.5V21h4.5"/></svg>Z (along sideline)</div>
       <div class="ctrl-row">
         <input type="range" id="camZ" min="-80" max="80" step="0.5" value="-42">
         <input type="number" id="camZ-num" step="0.5" value="-42">
@@ -242,44 +276,44 @@
 
   <!-- ── Camera Orientation ── -->
   <div class="section">
-    <div class="section-title">Camera Orientation</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Camera Orientation</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Pitch (up/down)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="8" height="6" rx="1"/><path d="M11 12h3"/><path d="M17 4.5a9 9 0 0 1 0 15"/><path d="M14.5 4l2.5.5-.6 2.5M14.5 20l2.5-.5-.6-2.5"/></svg>Pitch (up/down)</div>
       <div class="ctrl-row">
         <input type="range" id="pitch" min="-90" max="90" step="1" value="-15">
         <input type="number" id="pitch-num" step="1" value="-15">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Yaw (left/right)</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M12 3v18"/><rect x="9" y="7" width="6" height="4" rx="1"/><path d="M5 14.5c0 1.9 3.1 3.5 7 3.5s7-1.6 7-3.5"/><path d="M16.5 19.5l2.5-1.5-1.4-2.4"/></svg>Yaw (left/right)</div>
       <div class="ctrl-row">
         <input type="range" id="yaw" min="-180" max="180" step="1" value="0">
         <input type="number" id="yaw-num" step="1" value="0">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Roll</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><path d="M19.5 9.5A8 8 0 1 1 15 4.6"/><path d="M15.5 2l.2 3-3 .7"/></svg>Roll</div>
       <div class="ctrl-row">
-        <input type="range" id="roll" min="-45" max="45" step="1" value="0">
-        <input type="number" id="roll-num" step="1" value="0">
+        <input type="range" id="roll" min="-90" max="90" step="1" value="0">
+        <input type="number" id="roll-num" min="-90" max="90" step="1" value="0">
       </div>
     </div>
   </div>
 
   <!-- ── Field of View ── -->
   <div class="section">
-    <div class="section-title">Field of View</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="9" width="5" height="6" rx="1"/><path d="M7 12l14-8M7 12l14 8"/><path d="M17 6.3a12 12 0 0 1 0 11.4"/></svg>Field of View</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Horizontal FOV</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21L4 8M12 21l8-13"/><path d="M5 3.5h14M7.5 1.5l-2.5 2 2.5 2M16.5 1.5l2.5 2-2.5 2"/></svg>Horizontal FOV</div>
       <div class="ctrl-row">
         <input type="range" id="hfov" min="10" max="170" step="1" value="90">
         <input type="number" id="hfov-num" step="1" value="90">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Vertical FOV</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l13-8M3 12l13 8"/><path d="M20.5 5v14M18.5 7.5l2-2.5 2 2.5M18.5 16.5l2 2.5 2-2.5"/></svg>Vertical FOV</div>
       <div class="ctrl-row">
         <input type="range" id="vfov" min="5" max="160" step="1" value="55">
         <input type="number" id="vfov-num" step="1" value="55">
@@ -289,30 +323,34 @@
 
   <!-- ── Field Dimensions ── -->
   <div class="section">
-    <div class="section-title">Pitch Dimensions</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"/><path d="M14.5 12.5l2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></svg>Pitch Dimensions</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Length</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="18" height="10" rx="1"/><path d="M3 5h18M5.5 3L3 5l2.5 2M18.5 3L21 5l-2.5 2"/></svg>Length</div>
       <div class="ctrl-row">
-        <input type="range" id="fieldL" min="13" max="120" step="0.1" value="105">
-        <input type="number" id="fieldL-num" min="13" max="120" step="0.1" value="105">
+        <input type="range" id="fieldL" min="13" max="180" step="0.1" value="105">
+        <input type="number" id="fieldL-num" min="13" max="180" step="0.1" value="105">
       </div>
     </div>
     <div class="ctrl">
-      <div class="ctrl-label">Width</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="13" rx="1"/><path d="M20 6v13M18 8.5l2-2.5 2 2.5M18 16.5l2 2.5 2-2.5"/></svg>Width</div>
       <div class="ctrl-row">
-        <input type="range" id="fieldW" min="6" max="90" step="0.1" value="68">
-        <input type="number" id="fieldW-num" min="6" max="90" step="0.1" value="68">
+        <input type="range" id="fieldW" min="6" max="150" step="0.1" value="68">
+        <input type="number" id="fieldW-num" min="6" max="150" step="0.1" value="68">
       </div>
+    </div>
+    <div class="ctrl">
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.8l4 2.9-1.5 4.7h-5L8 10.7z"/><path d="M12 7.8V3M16 10.7l4.3-1.4M14.5 15.4l2.6 3.9M9.5 15.4l-2.6 3.9M8 10.7L3.7 9.3"/></svg>Sport</div>
+      <div class="field-presets" id="field-presets"></div>
     </div>
   </div>
 
   <!-- ── Viewing Camera ── -->
   <div class="section">
-    <div class="section-title">Viewing Camera (Scene)</div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Viewing Camera (Scene)</div>
 
     <div class="ctrl">
-      <div class="ctrl-label">Preset</div>
+      <div class="ctrl-label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l8.5 4.8v9.4L12 21.5l-8.5-4.8V7.3z"/><path d="M12 12l8.5-4.7M12 12L3.5 7.3M12 12v9.5"/></svg>Preset</div>
       <div style="display:flex;gap:6px;margin-top:4px;">
         <button class="view-btn" data-view="top">Top</button>
         <button class="view-btn" data-view="side">Side</button>
@@ -325,13 +363,18 @@
   <div style="font-size:10px;color:#484f58;line-height:1.6;margin-top:8px;">
     Drag to orbit · Scroll to zoom · Right-drag to pan
   </div>
+
+  <div class="sidebar-links">
+    <a id="share-link" class="sidebar-link" href=""><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share visualisation</a>
+    <a class="sidebar-link" href="https://github.com/nickgrealy/frustrum-visualiser/issues" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="6" width="10" height="14" rx="5"/><path d="M9 6.5a3 3 0 0 1 6 0M12 11v9M7 11H3M17 11h4M7 16H3.5M17 16h3.5M8 8L5 5.5M16 8l3-2.5"/></svg>Raise a bug</a>
+  </div>
 </div>
 
 <div id="viewport">
   <div id="stats">
-    <b>Coverage area:</b> <span id="stat-area">—</span><br>
-    <b>Farthest point:</b> <span id="stat-far">—</span><br>
-    <b>Nearest point:</b> <span id="stat-near">—</span>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L9 6h6l4 13z" fill="currentColor" fill-opacity=".2"/></svg><b>Coverage area:</b> <span id="stat-area">—</span></div>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="2"/><path d="M6 12h14M20 7v10"/></svg><b>Farthest point:</b> <span id="stat-far">—</span></div>
+    <div class="stat"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="4" cy="12" r="2"/><path d="M6 12h5M11 7v10"/></svg><b>Nearest point:</b> <span id="stat-near">—</span></div>
   </div>
   <div id="inset-label">Camera POV</div>
   <div id="inset-border"></div>
@@ -362,9 +405,12 @@ const state = {
   pitch: -15, yaw: 0, roll: 0,
   hFov: 90, vFov: 55,
   fieldL: 105, fieldW: 68,
+  sport: 'football',
+  // Viewing (orbit) camera: position + look-at target fully define its orientation.
+  viewPos: [0, 90, -100], viewTarget: [0, 0, 0], viewFov: 50,
 };
 
-// Load from localStorage if available
+// Load order, per field: defaults → localStorage → URL query params.
 (() => {
   try {
     const saved = localStorage.getItem('frustum-viz-state');
@@ -377,14 +423,117 @@ const state = {
   }
 })();
 
+// Share-link query params ⇄ state. Vector params are comma-separated.
+const PARAMS = {
+  L: ['fieldL'], W: ['fieldW'],
+  cam: ['camX', 'camY', 'camZ'],
+  rot: ['pitch', 'yaw', 'roll'],
+  fov: ['hFov', 'vFov'],
+};
+// State keys backed by a slider, so URL values can be clamped to its range.
+const SLIDER_IDS = {
+  camX: 'camX', camY: 'camY', camZ: 'camZ', pitch: 'pitch', yaw: 'yaw', roll: 'roll',
+  hFov: 'hfov', vFov: 'vfov', fieldL: 'fieldL', fieldW: 'fieldW',
+};
+const round2 = v => Math.round(v * 100) / 100;
+
+// Returns n finite numbers from "a,b,c", or null if malformed.
+function parseNums(str, n) {
+  if (str == null) return null;
+  const parts = str.split(',');
+  if (parts.length !== n || parts.some(x => x.trim() === '')) return null;
+  const nums = parts.map(Number);
+  return nums.every(Number.isFinite) ? nums : null;
+}
+
+// Sport is validated after sports.json loads; unknown ids keep the saved sport.
+let urlSport = null;
+(() => {
+  const q = new URLSearchParams(location.search);
+  for (const [param, keys] of Object.entries(PARAMS)) {
+    const nums = parseNums(q.get(param), keys.length);
+    if (!nums) continue;
+    keys.forEach((key, i) => {
+      const el = document.getElementById(SLIDER_IDS[key]);
+      state[key] = Math.min(+el.max, Math.max(+el.min, nums[i]));
+    });
+  }
+  const view = parseNums(q.get('view'), 3), look = parseNums(q.get('look'), 3);
+  if (view) state.viewPos = view;
+  if (look) state.viewTarget = look;
+  const vfov = parseNums(q.get('vfov'), 1);
+  if (vfov) state.viewFov = Math.min(120, Math.max(5, vfov[0]));
+  urlSport = q.get('sport');
+})();
+
+function shareQuery() {
+  const q = new URLSearchParams();
+  q.set('sport', state.sport);
+  for (const [param, keys] of Object.entries(PARAMS)) {
+    q.set(param, keys.map(k => round2(state[k])).join(','));
+  }
+  q.set('view', state.viewPos.map(round2).join(','));
+  q.set('look', state.viewTarget.map(round2).join(','));
+  q.set('vfov', round2(state.viewFov));
+  return q.toString().replace(/%2C/g, ','); // keep commas readable
+}
+
+// ─── Sport definitions (sports.json) ─────────────────────────────────────────
+
+// Used when sports.json can't be loaded: a plain rectangle, no markings.
+const FALLBACK_SPORT = {
+  id: 'plain', name: 'Plain',
+  size: { L: 105, W: 68 },
+  surface: { shape: 'rect', color: '#1e5c3a' },
+  surround: { color: '#1a4731', margin: 10 },
+  markings: [{ type: 'outline' }],
+};
+
+let SPORTS = [];
+let sportsError = null;
+try {
+  const res = await fetch('sports.json');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  SPORTS = (await res.json()).sports;
+} catch (e) {
+  sportsError = e;
+  console.warn('Failed to load sports.json:', e);
+}
+
+if (urlSport && SPORTS.some(sp => sp.id === urlSport)) state.sport = urlSport;
+
+function currentSport() {
+  return SPORTS.find(sp => sp.id === state.sport) || SPORTS[0] || FALLBACK_SPORT;
+}
+
 // Save state to localStorage
-function saveState() {
+// Persist state everywhere it lives: localStorage, the address bar (replaced in
+// place, so no history entries) and the share link's href.
+const shareLink = document.getElementById('share-link');
+function flushState() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
   try {
     localStorage.setItem('frustum-viz-state', JSON.stringify(state));
   } catch (e) {
     console.warn('Failed to save state to localStorage:', e);
   }
+  try {
+    history.replaceState(null, '', `${location.pathname}?${shareQuery()}${location.hash}`);
+  } catch (e) {
+    console.warn('Failed to update address bar:', e);
+  }
+  shareLink.href = location.href;
 }
+
+// Slider drags and orbiting change state every frame; throttle saves (Safari
+// also rejects more than ~100 replaceState calls per 30 s). The trailing save
+// reads state when it fires, so the final value is always written.
+let saveTimer = null;
+function saveState() {
+  if (!saveTimer) saveTimer = setTimeout(flushState, 500);
+}
+window.addEventListener('pagehide', () => { if (saveTimer) flushState(); });
 
 // ─── Renderer ─────────────────────────────────────────────────────────────────
 
@@ -408,14 +557,23 @@ scene.add(dirLight);
 
 // ─── Viewing camera (orbit) ───────────────────────────────────────────────────
 
-const viewCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 2000);
-viewCamera.position.set(0, 90, -100);
-viewCamera.lookAt(0, 0, 0);
+const viewCamera = new THREE.PerspectiveCamera(state.viewFov, 1, 0.1, 2000);
+viewCamera.position.set(...state.viewPos);
 
 const controls = new OrbitControls(viewCamera, renderer.domElement);
-controls.target.set(0, 0, 0);
+controls.target.set(...state.viewTarget);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+controls.update();
+
+// Copy the orbit view into state on every change; saveState() throttles writes.
+function saveView() {
+  state.viewPos = viewCamera.position.toArray();
+  state.viewTarget = controls.target.toArray();
+  state.viewFov = viewCamera.fov;
+  saveState();
+}
+controls.addEventListener('change', saveView);
 
 // ─── Field camera ────────────────────────────────────────────────────────────
 
@@ -423,143 +581,231 @@ controls.dampingFactor = 0.08;
 const fieldCamera = new THREE.PerspectiveCamera(55, 1.636, 0.3, 300);
 fieldCamera.layers.set(0);
 
-// ─── Soccer field geometry ───────────────────────────────────────────────────
+// ─── Field geometry ──────────────────────────────────────────────────────────
 
 let fieldGroup = new THREE.Group();
 scene.add(fieldGroup);
+
+// Outline of the playing surface (world coords, XZ plane) for the given size.
+function surfacePolygon(sport, length, width) {
+  const hl = length / 2, hw = width / 2;
+  if (sport.surface.shape === 'ellipse') {
+    const pts = [];
+    for (let i = 0; i < 96; i++) {
+      const a = (i / 96) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * hl, 0, Math.sin(a) * hw));
+    }
+    return pts;
+  }
+  if (sport.surface.shape === 'polygon') {
+    // Convex outline in standard-size metres, stretched to the field size.
+    const kx = length / sport.size.L, kz = width / sport.size.W;
+    return sport.surface.points.map(([x, z]) => new THREE.Vector3(x * kx, 0, z * kz));
+  }
+  if (sport.surface.shape === 'roundrect') {
+    // Corner radius scales with the markings (uniform s), capped to fit.
+    const s = Math.min(length / sport.size.L, width / sport.size.W);
+    const r = Math.min(sport.surface.radius * s, hl, hw);
+    const pts = [];
+    const corners = [[hl - r, hw - r, 0], [-hl + r, hw - r, 90], [-hl + r, -hw + r, 180], [hl - r, -hw + r, 270]];
+    for (const [cx, cz, start] of corners) {
+      for (let i = 0; i <= 12; i++) {
+        const a = (start + (i / 12) * 90) * DEG;
+        pts.push(new THREE.Vector3(cx + Math.cos(a) * r, 0, cz + Math.sin(a) * r));
+      }
+    }
+    return pts;
+  }
+  return [
+    new THREE.Vector3(-hl, 0, -hw),
+    new THREE.Vector3( hl, 0, -hw),
+    new THREE.Vector3( hl, 0,  hw),
+    new THREE.Vector3(-hl, 0,  hw),
+  ];
+}
+
+// Anchored scaling: marking sizes scale uniformly by s = min(L/L0, W/W0);
+// each position axis is anchored to the centre, the nearest edge, or stretched.
+function makeMapper(sport, length, width) {
+  const L0 = sport.size.L, W0 = sport.size.W;
+  const s = Math.min(length / L0, width / W0);
+  const axis = (v, mode, h0, h, k) => {
+    if (mode === 'edge') return Math.sign(v) * (h - (h0 - Math.abs(v)) * s);
+    if (mode === 'stretch') return v * k;
+    return v * s; // 'centre'
+  };
+  return {
+    s,
+    map: (x, z, [ax, az]) => [
+      axis(x, ax, L0 / 2, length / 2, length / L0),
+      axis(z, az, W0 / 2, width / 2, width / W0),
+    ],
+  };
+}
+
+const MIRRORS = { x: [[1, 1], [-1, 1]], z: [[1, 1], [1, -1]], xz: [[1, 1], [-1, 1], [1, -1], [-1, -1]] };
+
+// Expand a marking into vertex paths. A vertex is a base point (bx, bz) that
+// goes through the anchor mapping, plus an offset (ox, oy, oz) scaled by s.
+function markingPaths(m) {
+  const anchor = m.anchor || ['centre', 'centre'];
+  // Optional m.y raises a flat marking (e.g. a table top) off the ground.
+  const v = (bx, bz, a, ox = 0, oy = m.y || 0, oz = 0) => ({ bx, bz, a, ox, oy, oz });
+  switch (m.type) {
+    case 'polyline':
+      return [m.points.map(([x, z], i) => v(x, z, m.anchors?.[i] || anchor))];
+    case 'poly3d':
+      return [m.points.map(([x, y, z], i) => v(x, z, m.anchors?.[i] || anchor, 0, y, 0))];
+    case 'rect': {
+      const [x1, z1] = m.from, [x2, z2] = m.to;
+      return [[v(x1, z1, anchor), v(x2, z1, anchor), v(x2, z2, anchor), v(x1, z2, anchor), v(x1, z1, anchor)]];
+    }
+    case 'circle': {
+      const from = m.from ?? 0, to = m.to ?? 360;
+      const n = Math.max(8, Math.ceil(Math.abs(to - from) / 5));
+      const [cx, cz] = m.centre;
+      const pts = [];
+      for (let i = 0; i <= n; i++) {
+        const a = (from + (to - from) * (i / n)) * DEG;
+        pts.push(v(cx, cz, anchor, Math.cos(a) * m.r, m.y || 0, Math.sin(a) * m.r));
+      }
+      return [pts];
+    }
+    default:
+      console.warn('Unknown marking type:', m.type);
+      return [];
+  }
+}
+
+// Clip a polyline to a convex polygon (XZ plane), returning the inside runs.
+// Points on the boundary count as inside (with a small tolerance), so lines
+// drawn along the field edge are kept.
+function clipPolylineToConvex(pts, poly) {
+  let area = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    area += a.x * b.z - b.x * a.z;
+  }
+  const sign = Math.sign(area), EPS = 1e-6;
+  const runs = [];
+  let run = null;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const p0 = pts[i], p1 = pts[i + 1];
+    const dx = p1.x - p0.x, dz = p1.z - p0.z;
+    // Cyrus–Beck: shrink [t0, t1] against each edge's inside half-plane.
+    let t0 = 0, t1 = 1;
+    for (let j = 0; j < poly.length && t0 <= t1; j++) {
+      const a = poly[j], b = poly[(j + 1) % poly.length];
+      const ex = b.x - a.x, ez = b.z - a.z;
+      const len = Math.hypot(ex, ez) || 1;
+      const f = q => sign * (ex * (q.z - a.z) - ez * (q.x - a.x)) / len + EPS;
+      const f0 = f(p0), d = sign * (ex * dz - ez * dx) / len;
+      if (Math.abs(d) < 1e-12) { if (f0 < 0) t0 = 2; continue; }
+      const t = -f0 / d;
+      if (d > 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t);
+    }
+    if (t0 > t1) { run = null; continue; }
+    const a = new THREE.Vector3(p0.x + dx * t0, p0.y, p0.z + dz * t0);
+    const b = new THREE.Vector3(p0.x + dx * t1, p0.y, p0.z + dz * t1);
+    if (run && t0 === 0) run.push(b);
+    else { run = [a, b]; runs.push(run); }
+    if (t1 < 1) run = null;
+  }
+  return runs;
+}
 
 function buildField(length, width) {
   // Remove old field
   while (fieldGroup.children.length) fieldGroup.remove(fieldGroup.children[0]);
 
-  const hl = length / 2, hw = width / 2;
-  // Scale all FIFA markings proportionally to pitch length (standard = 105m).
-  const s = length / 105;
+  const sport = currentSport();
+  const { s, map } = makeMapper(sport, length, width);
+  const LINE_Y = 0.05;
 
-  // Green grass plane
-  const grassGeo = new THREE.PlaneGeometry(length + 20, width + 20);
-  const grassMat = new THREE.MeshLambertMaterial({ color: 0x1a4731 });
-  const grass = new THREE.Mesh(grassGeo, grassMat);
-  grass.rotation.x = -Math.PI / 2;
-  fieldGroup.add(grass);
+  // Surround (grass / floor around the playing area)
+  const margin = [].concat(sport.surround?.margin ?? 10);
+  const mx = margin[0], mz = margin[1] ?? margin[0];
+  const surroundL = length + 2 * mx, surroundW = width + 2 * mz;
+  const surround = new THREE.Mesh(
+    new THREE.PlaneGeometry(surroundL, surroundW),
+    new THREE.MeshLambertMaterial({ color: sport.surround?.color || '#1a4731' }),
+  );
+  surround.rotation.x = -Math.PI / 2;
+  fieldGroup.add(surround);
 
-  // Slightly lighter inner pitch
-  const pitchGeo = new THREE.PlaneGeometry(length, width);
-  const pitchMat = new THREE.MeshLambertMaterial({ color: 0x1e5c3a });
-  const pitch = new THREE.Mesh(pitchGeo, pitchMat);
-  pitch.rotation.x = -Math.PI / 2;
-  pitch.position.y = 0.01;
-  fieldGroup.add(pitch);
+  // Playing surface
+  const outline = surfacePolygon(sport, length, width);
+  const flatShape = pts => {
+    const shape = new THREE.Shape();
+    shape.moveTo(pts[0].x, pts[0].z);
+    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
+    shape.closePath();
+    return new THREE.ShapeGeometry(shape);
+  };
+  // +90° about X maps shape (x, y) onto world (x, z) without mirroring z.
+  // Flat fills share the surface height; polygonOffset (not a y gap) layers
+  // them, so they don't z-fight with each other or the coverage overlay.
+  const addFlat = (pts, color, layer, y = 0) => {
+    const mat = new THREE.MeshLambertMaterial({
+      color, side: THREE.DoubleSide,
+      polygonOffset: true, polygonOffsetFactor: -layer, polygonOffsetUnits: -layer,
+    });
+    const mesh = new THREE.Mesh(flatShape(pts), mat);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.y = y ? y - 0.005 : 0.01; // raised fills sit just under their lines
+    fieldGroup.add(mesh);
+  };
+  addFlat(outline, sport.surface.color, 1);
+  let fillLayer = 2; // each later fill draws above earlier ones
 
-  // White line material
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+  const lineColor = sport.lineColor || '#ffffff';
+  const lineMat = new THREE.LineBasicMaterial({ color: lineColor });
+  const dashMat = new THREE.LineDashedMaterial({ color: lineColor, dashSize: 0.8, gapSize: 0.6 });
 
-  function addLines(points, loop = false) {
+  function addLine(points, { color, dashed, y = 0 } = {}) {
     const geo = new THREE.BufferGeometry().setFromPoints(points);
-    const line = loop ? new THREE.LineLoop(geo, lineMat) : new THREE.Line(geo, lineMat);
-    line.position.y = 0.05;
+    const mat = color
+      ? new THREE.LineBasicMaterial({ color })
+      : dashed ? dashMat : lineMat;
+    const line = new THREE.Line(geo, mat);
+    if (dashed) line.computeLineDistances();
+    line.position.y = y;
     fieldGroup.add(line);
   }
 
-  // Outer boundary
-  addLines([
-    new THREE.Vector3(-hl, 0, -hw),
-    new THREE.Vector3( hl, 0, -hw),
-    new THREE.Vector3( hl, 0,  hw),
-    new THREE.Vector3(-hl, 0,  hw),
-  ], true);
-
-  // Halfway line
-  addLines([
-    new THREE.Vector3(0, 0, -hw),
-    new THREE.Vector3(0, 0,  hw),
-  ]);
-
-  // Centre circle (9.15m radius)
-  {
-    const r = 9.15 * s;
-    const pts = [];
-    for (let i = 0; i <= 64; i++) {
-      const a = (i / 64) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+  for (const m of sport.markings) {
+    if (m.type === 'outline') {
+      addLine([...outline, outline[0]], { color: m.color, y: LINE_Y });
+      continue;
     }
-    addLines(pts);
-  }
-
-  // Centre spot
-  {
-    const r = 0.3 * s;
-    const pts = [];
-    for (let i = 0; i <= 24; i++) {
-      const a = (i / 24) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
-    }
-    addLines(pts);
-  }
-
-  // Penalty areas (16.5m deep, 40.32m wide)
-  for (const side of [-1, 1]) {
-    const gx = side * hl;
-    const pw = (40.32 / 2) * s, pd = 16.5 * s;
-    addLines([
-      new THREE.Vector3(gx, 0, -pw),
-      new THREE.Vector3(gx - side * pd, 0, -pw),
-      new THREE.Vector3(gx - side * pd, 0,  pw),
-      new THREE.Vector3(gx, 0,  pw),
-    ], false);
-
-    // Goal area (5.5m deep, 18.32m wide)
-    const gw = (18.32 / 2) * s, gd = 5.5 * s;
-    addLines([
-      new THREE.Vector3(gx, 0, -gw),
-      new THREE.Vector3(gx - side * gd, 0, -gw),
-      new THREE.Vector3(gx - side * gd, 0,  gw),
-      new THREE.Vector3(gx, 0,  gw),
-    ], false);
-
-    // Penalty spot
-    {
-      const px = gx - side * 11 * s;
-      const r = 0.3 * s;
-      const pts = [];
-      for (let i = 0; i <= 16; i++) {
-        const a = (i / 16) * Math.PI * 2;
-        pts.push(new THREE.Vector3(px + Math.cos(a) * r, 0, Math.sin(a) * r));
+    const is3d = m.type === 'poly3d' || m.y;
+    for (const [fx, fz] of MIRRORS[m.mirror] || [[1, 1]]) {
+      for (const path of markingPaths(m)) {
+        const pts = path.map(({ bx, bz, a, ox, oy, oz }) => {
+          const [x, z] = map(fx * bx, fz * bz, a);
+          return new THREE.Vector3(x + fx * ox * s, oy * s, z + fz * oz * s);
+        });
+        if (m.fill) addFlat(pts, m.fill, fillLayer++, is3d ? (m.y || 0) * s : 0);
+        if (m.line === false) continue;
+        if (is3d) {
+          addLine(pts, { color: m.color, dashed: m.dashed });
+        } else {
+          // Ground lines are clipped to the surface, so anchored markings that
+          // outgrow a resized field (e.g. AFL 50 m arcs) never spill past it.
+          for (const run of clipPolylineToConvex(pts, outline)) {
+            addLine(run, { color: m.color, dashed: m.dashed, y: LINE_Y });
+          }
+        }
       }
-      addLines(pts);
     }
-
-    // Goals (7.32m wide, 2.44m tall)
-    const goalW = (7.32 / 2) * s, goalH = 2.44 * s, goalD = 2 * s;
-    const goalMat = new THREE.LineBasicMaterial({ color: 0xdddddd });
-    const goalPts = [
-      new THREE.Vector3(gx, 0, -goalW),
-      new THREE.Vector3(gx + side * goalD, 0, -goalW),
-      new THREE.Vector3(gx + side * goalD, goalH, -goalW),
-      new THREE.Vector3(gx, goalH, -goalW),
-      new THREE.Vector3(gx, goalH,  goalW),
-      new THREE.Vector3(gx + side * goalD, goalH,  goalW),
-      new THREE.Vector3(gx + side * goalD, 0,  goalW),
-      new THREE.Vector3(gx, 0,  goalW),
-    ];
-    const goalGeo = new THREE.BufferGeometry().setFromPoints(goalPts);
-    fieldGroup.add(new THREE.Line(goalGeo, goalMat));
-
-    // Goal crossbar
-    const crossPts = [
-      new THREE.Vector3(gx, goalH, -goalW),
-      new THREE.Vector3(gx, goalH,  goalW),
-    ];
-    const crossGeo = new THREE.BufferGeometry().setFromPoints(crossPts);
-    fieldGroup.add(new THREE.Line(crossGeo, goalMat));
   }
 
-  // Grid on grass (faint)
+  // Grid on surround (faint)
   const gridMat = new THREE.LineBasicMaterial({ color: 0x1a4020, transparent: true, opacity: 0.5 });
-  for (let x = -Math.floor((length + 20) / 2); x <= Math.ceil((length + 20) / 2); x += 5) {
+  for (let x = -Math.floor(surroundL / 2); x <= Math.ceil(surroundL / 2); x += 5) {
     const g = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(x, 0, -(width + 20) / 2),
-      new THREE.Vector3(x, 0,  (width + 20) / 2),
+      new THREE.Vector3(x, 0, -surroundW / 2),
+      new THREE.Vector3(x, 0,  surroundW / 2),
     ]);
     const l = new THREE.Line(g, gridMat);
     l.position.y = 0.001;
@@ -582,7 +828,18 @@ camGroup.add(camBody);
 
 // ─── Camera helper (frustum wireframe) ───────────────────────────────────────
 
-let cameraHelper = new THREE.CameraHelper(fieldCamera);
+// Default CameraHelper colours, except the centreline ("target") is red so it
+// doesn't blend in with the white field markings.
+function makeCameraHelper(camera) {
+  const helper = new THREE.CameraHelper(camera);
+  helper.setColors(
+    new THREE.Color(0xffaa00), new THREE.Color(0xff0000), new THREE.Color(0x00aaff),
+    new THREE.Color(0xff3b30), new THREE.Color(0x333333),
+  );
+  return helper;
+}
+
+let cameraHelper = makeCameraHelper(fieldCamera);
 scene.add(cameraHelper);
 
 // ─── Frustum ground intersection ─────────────────────────────────────────────
@@ -634,34 +891,33 @@ function computeFootprint(camera) {
 }
 
 // Sutherland–Hodgman clip of a polygon (array of Vector3, y ignored) against
-// an axis-aligned rectangle on the XZ plane. Returns the clipped polygon.
-function clipToRect(poly, xmin, xmax, zmin, zmax) {
-  const clipEdge = (input, inside, intersect) => {
-    const out = [];
-    for (let i = 0; i < input.length; i++) {
-      const cur = input[i];
-      const prev = input[(i - 1 + input.length) % input.length];
-      const curIn = inside(cur), prevIn = inside(prev);
-      if (curIn) {
-        if (!prevIn) out.push(intersect(prev, cur));
-        out.push(cur);
-      } else if (prevIn) {
-        out.push(intersect(prev, cur));
+// a convex polygon on the XZ plane (the playing surface). Returns the clipped polygon.
+function clipToConvex(poly, clip) {
+  // Orientation of the clip polygon, so "inside" works for either winding.
+  let area = 0;
+  for (let i = 0; i < clip.length; i++) {
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    area += a.x * b.z - b.x * a.z;
+  }
+  const sign = Math.sign(area);
+
+  let out = poly;
+  for (let i = 0; i < clip.length && out.length; i++) {
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    const side = p => sign * ((b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x));
+    const input = out;
+    out = [];
+    for (let j = 0; j < input.length; j++) {
+      const cur = input[j], prev = input[(j - 1 + input.length) % input.length];
+      const dc = side(cur), dp = side(prev);
+      if ((dc >= 0) !== (dp >= 0)) {
+        const t = dp / (dp - dc);
+        out.push(new THREE.Vector3(prev.x + (cur.x - prev.x) * t, 0, prev.z + (cur.z - prev.z) * t));
       }
+      if (dc >= 0) out.push(cur);
     }
-    return out;
-  };
-
-  const lerp = (a, b, t) => new THREE.Vector3(
-    a.x + (b.x - a.x) * t, 0, a.z + (b.z - a.z) * t,
-  );
-
-  let p = poly;
-  p = clipEdge(p, v => v.x >= xmin, (a, b) => lerp(a, b, (xmin - a.x) / (b.x - a.x)));
-  p = clipEdge(p, v => v.x <= xmax, (a, b) => lerp(a, b, (xmax - a.x) / (b.x - a.x)));
-  p = clipEdge(p, v => v.z >= zmin, (a, b) => lerp(a, b, (zmin - a.z) / (b.z - a.z)));
-  p = clipEdge(p, v => v.z <= zmax, (a, b) => lerp(a, b, (zmax - a.z) / (b.z - a.z)));
-  return p;
+  }
+  return out;
 }
 
 function updateIntersection() {
@@ -675,7 +931,6 @@ function updateIntersection() {
   const nearEl = document.getElementById('stat-near');
 
   // Full frustum footprint on the ground (not clipped to pitch).
-  const hl = state.fieldL / 2, hw = state.fieldW / 2;
   const pts = computeFootprint(fieldCamera);
 
   if (pts.length < 3) {
@@ -686,7 +941,7 @@ function updateIntersection() {
   }
 
   // Stats reflect the on-pitch coverage (clip footprint to pitch for this).
-  const pitchPts = clipToRect(pts, -hl, hl, -hw, hw);
+  const pitchPts = clipToConvex(pts, surfacePolygon(currentSport(), state.fieldL, state.fieldW));
   if (pitchPts.length >= 3) {
     let area = 0;
     for (let i = 0; i < pitchPts.length; i++) {
@@ -717,6 +972,7 @@ function updateIntersection() {
     transparent: true,
     opacity: 0.18,
     side: THREE.DoubleSide,
+    depthTest: false, // ground overlay: always over the surface and its fills
     depthWrite: false,
   });
   // +90° about X maps the shape's (x, z) plane onto world (x, z) without
@@ -771,7 +1027,7 @@ function updateFieldCamera() {
 
   // Rebuild camera helper
   scene.remove(cameraHelper);
-  cameraHelper = new THREE.CameraHelper(fieldCamera);
+  cameraHelper = makeCameraHelper(fieldCamera);
   scene.add(cameraHelper);
 
   updateIntersection();
@@ -820,6 +1076,44 @@ wireControl('vfov', 'vFov', fmtDeg);
 wireControl('fieldL', 'fieldL', fmtM);
 wireControl('fieldW', 'fieldW', fmtM);
 
+// Sport presets (from sports.json)
+const presetWrap = document.getElementById('field-presets');
+const fieldInputs = ['fieldL', 'fieldW'].map(id => document.getElementById(id));
+
+function markActiveSport() {
+  presetWrap.querySelectorAll('.field-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.sport === currentSport().id);
+  });
+}
+
+function selectSport(sport) {
+  state.sport = sport.id;
+  // Go through the number inputs' change path (rebuild, stats, save); unlike
+  // the sliders they don't snap to the 0.1 m step, so exact sizes survive.
+  [sport.size.L, sport.size.W].forEach((v, i) => {
+    const num = document.getElementById(fieldInputs[i].id + '-num');
+    num.value = v;
+    num.dispatchEvent(new Event('change'));
+  });
+  markActiveSport();
+}
+
+if (sportsError) {
+  presetWrap.innerHTML = `<div class="field-error">Couldn't load <code>sports.json</code>.
+    Serve this folder over HTTP (e.g. <code>npx serve</code>) instead of opening the file directly.</div>`;
+}
+
+// Buttons are alphabetical; SPORTS keeps sports.json order so SPORTS[0] stays the default.
+[...SPORTS].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })).forEach(sport => {
+  const btn = document.createElement('button');
+  btn.className = 'field-btn';
+  btn.dataset.sport = sport.id;
+  btn.innerHTML = `${sport.name}<small>${sport.size.L} × ${sport.size.W} m</small>`;
+  btn.addEventListener('click', () => selectSport(sport));
+  presetWrap.appendChild(btn);
+});
+markActiveSport();
+
 // View presets
 const PRESETS = {
   top:  { pos: [0, 150, 0.01],  target: [0, 0, 0] },
@@ -852,6 +1146,7 @@ document.querySelectorAll('.view-btn').forEach(btn => {
       viewCamera.updateProjectionMatrix();
     }
     controls.update();
+    saveView(); // FOV-only changes don't fire 'change'
   });
 });
 
@@ -934,6 +1229,7 @@ function animate() {
 
 buildField(state.fieldL, state.fieldW);
 updateFieldCamera();
+flushState(); // write back the merged URL/localStorage state: address bar + share link
 animate();
 </script>
 
